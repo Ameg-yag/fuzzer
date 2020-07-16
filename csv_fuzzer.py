@@ -2,7 +2,6 @@ import sys
 import os
 from pwn import *
 import csv 
-import json
 import random 
 
 

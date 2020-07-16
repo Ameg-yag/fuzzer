@@ -8,6 +8,7 @@ import json
 import random 
 
 from csv_fuzzer import *
+from json_fuzzer import *
 
 # argument error checking
     # 1 = binary name
@@ -33,8 +34,24 @@ if not (os.path.isfile(inputFile)):
 
 # open files
 # test input to determine input file type
+with open(inputFile) as file:
+	try:
+		json.load(file)
+	except:
+		print("not json")
+	else:
+		json_fuzzer(binary, inputFile)
+		exit()
 
-csv_fuzzer(binary, inputFile)
+with open(inputFile) as file:
+	try:
+		dialect = csv.Sniffer().sniff(file.read(1024))
+	except: 
+		print("is xml")
+		#doesn't work sadly only determines xml is not csv 
+		#can't distinguish between plaintext and csv 
+	else: 
+		csv_fuzzer(binary, inputFile)
 
 
 
