@@ -30,79 +30,31 @@ def empty_csv(binary):
 	p.send("")
 	check_process(p,"")
 
-def fields_csv(binary, csv_input):
-	p = process(binary)
-	error = []
-	p.sendline(','.join(csv_input[i]))
-	error.append( ','.join(csv_input[i]))
-	error.append('\n')
-	p.send('')
-	for string_length in range(1, 10000, 10):
-		for x in range(len(csv_input[1])):
-			out = ""
-			for i in range(0, string_length):
-				out += chr(random.randrange(0x41, 0x42))
-			csv_input[1][x] = out
-	
-		for r in range(1, len(csv_input)):
-			output = b""
-			output += ','.join(csv_input[r])
-			print(output)
-			p.sendline(output)
-			error.append(output)
-			error.append('\n')
-			if p.poll(block = False) != None:
-				break;
-
-		print("Testing... ", csv_input) 
-		if p.poll(block = False) != None:
-			break
-
-
-	p.proc.stdin.close()
-	if p.poll(block=True) < 0:
-		print("Found something..., saving to file bad.txt")
-		out = open("./bad.txt", "w")
-		out.writelines(error)
-		out.close()
-		exit()
-
-
-	p.close()
-
-	print("No vulnerabilties found")
 
 def fields_csv(binary, csv_input):
-	
-	p = process(binary)
-	error = []
-	p.sendline(','.join(csv_input[i]))
-	error.append( ','.join(csv_input[i]))
-	error.append('\n')
-	p.send('')
-	for string_length in range(1, 10000, 10):
-		for x in range(len(csv_input[1])):
-			out = ""
-			for i in range(0, string_length):
-				out += chr(random.randrange(0x41, 0x42))
-			csv_input[1][x] = out
-	
-		for r in range(1, len(csv_input)):
-			output = b""
-			output += ','.join(csv_input[r])
-			print(output)
-			p.sendline(output)
-			error.append(output)
-			error.append('\n')
-			if p.poll(block = False) != None:
-				break;
-
-		print("Testing... ", csv_input) 
-		if p.poll(block = False) != None:
-			break
-
-	check_process(p,output)
-	p.close()
+	for field_no in range(1, len(csv_input[0]) + 10):
+		p = process(binary)
+		error = []
+		for x in range(len(csv_input)):
+			n = len(csv_input[x])
+			if field_no < n:
+				for i in range(0, n - field_no): 
+					csv_input[x].pop()
+			else:
+				for i in range(n,field_no):
+					csv_input[x].append("A")
+			try:
+				p.sendline(','.join(csv_input[x]))
+			except:
+				if x > 0:
+					# assumption that sending multiple lines is accpeted no of fields
+					# assumption only one right number of fields 
+					expected_field_no = x
+				break
+			error.append( ','.join(csv_input[x]) + '\n')
+		check_process(p,error)
+		p.close() 
+	return expected_field_no
 
 # Check if a enough CSV lines will crash the program 
 def lines_csv(binary, csv_input):
@@ -124,8 +76,10 @@ def csv_fuzzer(binary, inputFile):
 	csv_input = read_csv(sampleInputFileName)
 	# check nothing 
 	empty_csv(binary)
-	# check fields
+	# check number of lines 
 	lines_csv(binary, csv_input)
+	# check fields - can return number of expected fields 
+	fields_csv(binary, csv_input)
 
 
 # argument error checking
