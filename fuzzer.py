@@ -33,8 +33,22 @@ if not (os.path.isfile(inputFile)):
 
 # open files
 # test input to determine input file type
+with open(inputFile) as file:
+	try:
+		data = json.load(file)
+		print("call json fuzzer")
+		exit()
+	except:
+		print("not json")
 
-csv_fuzzer(binary, inputFile)
+with open(inputFile) as file:
+	try:
+		dialect = csv.Sniffer().sniff(file.read(100))
+		csv_fuzzer(binary, inputFile)
+	except: 
+		print("is xml")
+		#doesn't work sadly only determines xml is not csv 
+		#can't distinguish between plaintext and csv 
 
 
 
