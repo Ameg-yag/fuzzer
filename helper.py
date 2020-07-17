@@ -56,3 +56,4 @@ def test_payload(binary, payload):
         exit("payload is not a byte string")
     p.send(payload)
     check_process(p, payload)
+    p.close()
