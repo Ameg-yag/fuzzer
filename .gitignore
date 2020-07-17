@@ -1,3 +1,5 @@
 # ignore all logs
 *.pyc
 core
+__pycache__/
+test.py
