@@ -152,9 +152,3 @@ def json_fuzzer(binary, inputFile):
 	overflow_strings_json(binary, json_input)
 	## overflow integers 
 	overflow_integers_json(binary, json_input)
-
-
-
-
-	
-
