@@ -9,24 +9,27 @@ from helper import *
 def read_json(inputFile):
 	# currently read as string
 	with open(inputFile) as file:
-		return ''.join(file.readlines())
+		return json.load(file)
 
 def invaild_json(binary):
 	p = process(binary)
 	out = b''
+	payload = ""
 	for x in range(0, 1000):
-		out += chr(random.randrange(0,255))
+		payload += chr(random.randrange(0,255))
+	out += payload.encode('UTF-8')
 	p.send(out)
 	check_process(p,out)
 
 def json_fuzzer(binary, inputFile):
 
 	json_input = read_json(inputFile)
+	print(json_input)
 	# check nothing 
 	empty(binary)
 	# invalid json
 	invaild_json(binary)
-	# bit flips 
+	# bit flips
 
 	# format strings 
 
