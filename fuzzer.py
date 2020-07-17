@@ -26,11 +26,3 @@ if not (os.path.isfile(PATH_TO_SANDBOX + sampleInputFileName)):
 
 # open files
 
-
-# fuzz
-
-
-# print bad input (if any) [bad.txt]
-
-
-
