@@ -43,6 +43,7 @@ def check_process(p,output):
 
 def get_random_string(length):
     letters = string.ascii_lowercase
+    letters += string.ascii_uppercase
     new_str = ''.join(random.choice(letters) for i in range(length))
     return new_str
 
