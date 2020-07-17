@@ -43,7 +43,13 @@ def json_fuzzer(binary, inputFile):
 
 	# format strings 
 
-	# overflows 
+	# overflows strings 
+
+	# overflow intergers 
+
+	# 
+
+
 
 	
 
