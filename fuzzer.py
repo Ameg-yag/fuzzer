@@ -5,8 +5,11 @@ import os
 from pwn import *
 import csv 
 import json
-import random 
+import random
+import xml.etree.ElementTree as ET
 
+
+###--- CSV FUZZER FUNCTIONS ---###
 def read_csv(file):
 	csv_input = []
 	# Read and save csv output 
@@ -16,19 +19,6 @@ def read_csv(file):
 			csv_input.append(row)
 	return csv_input
 
-def check_process(p,output):
-	p.proc.stdin.close()
-	if p.poll(block=True) < 0:
-		print("Found something..., saving to file bad.txt")
-		out = open("./bad.txt", "w")
-		out.writelines(output)
-		out.close()
-		exit()
-
-def empty_csv(binary):
-	p = process(binary)
-	p.send("")
-	check_process(p,"")
 
 def fields_csv(binary, csv_input):
 	p = process(binary)
@@ -95,7 +85,7 @@ def fields_csv(binary, csv_input):
 			error.append(output)
 			error.append('\n')
 			if p.poll(block = False) != None:
-				break;
+				break
 
 		print("Testing... ", csv_input) 
 		if p.poll(block = False) != None:
@@ -123,10 +113,62 @@ def lines_csv(binary, csv_input):
 def csv_fuzzer(binary, inputFile):
 	csv_input = read_csv(sampleInputFileName)
 	# check nothing 
-	empty_csv(binary)
+	empty(binary)
 	# check fields
 	lines_csv(binary, csv_input)
 
+###--- JSON FUZZER FUNCTIONS ---###
+
+
+def json_fuzzer(binary, inputFile):
+	return True
+
+###--- TXT FUZZER FUNCTIONS ---###
+
+
+def txt_fuzzer(binary, inputFile):
+	return True
+
+###--- HELPER FUNCTIONS---###
+def empty(binary):
+	p = process(binary)
+	p.send("")
+	check_process(p,"")
+
+def is_json(file):
+    try:
+        file.seek(0)
+        jsonObj = json.load(file)
+    except ValueError as e:
+        return False
+    return True
+
+def is_csv(file):    # CSV sometimes thinks plaintext == CSV
+    try:
+        file.seek(0)
+        csvObj = csv.Sniffer().sniff(file.read(1024))
+    except csv.Error:
+        return False
+    return True
+
+def is_xml(file):
+    try:
+        file.seek(0)
+        xmlObj = ET.parse(file)
+    except:
+        return False
+    return True
+
+def check_process(p,output):
+	p.proc.stdin.close()
+	if p.poll(block=True) < 0:
+		print("Found something... saving to file bad.txt")
+		out = open("./bad.txt", "w")
+		out.writelines(output)
+		out.close()
+		exit()
+
+###--- MAIN ---###
 
 # argument error checking
     # 1 = binary name
@@ -152,6 +194,13 @@ if not (os.path.isfile(inputFile)):
 
 # open files
 # test input to determine input file type
-
-csv_fuzzer(binary, inputFile)
-
+with open(inputFile) as file:
+    if (is_json(file)):
+        json_fuzzer(binary, inputFile)
+    elif (is_xml(file)):
+        print("Thats xml")
+    elif (is_csv(file)):
+        csv_fuzzer(binary, inputFile)
+    else:
+        txt_fuzzer(binary, inputFile)
+    
