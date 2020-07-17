@@ -40,3 +40,18 @@ def check_process(p,output):
 		out.writelines(output)
 		out.close()
 		exit()
+
+def get_random_string(length):
+    letters = string.ascii_lowercase
+    new_str = ''.join(random.choice(letters) for i in range(length))
+    return new_str
+
+def test_payload(binary, payload):
+    p = process(binary)
+    # test payload is byte array
+    try:
+        payload = payload.decode()
+    except (UnicodeDecodeError, AttributeError):
+        exit("payload is not a byte string")
+    p.send(payload)
+    check_process(p, payload)
