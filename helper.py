@@ -55,6 +55,6 @@ def test_payload(binary, payload):
     except (UnicodeDecodeError, AttributeError):
         exit("payload is not a byte string")
     p.send(payload)
-    print("Trying", payload)
+    #print("Trying", payload)
     check_process(p, payload)
     p.close()

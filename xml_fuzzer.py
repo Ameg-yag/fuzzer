@@ -45,10 +45,21 @@ class XMLFuzzer:
             root.remove(root.find(child.tag))
             root.append(copy.deepcopy(child))
 
+        # Add some more information to each node
+        def add_info():
+            child.set("%x", "%s")
+
+        # remove all children (grandchildren of root if thats the correct term) from the child
+        def remove_child():
+            for grandchild in child:
+                child.remove(grandchild)
+
         switch = {
             0: remove(),
             1: duplicate(),
-            2: move()
+            2: move(),
+            3: add_info(),
+            4: remove_child()
         }
         switch.get(function)
 
@@ -74,14 +85,17 @@ class XMLFuzzer:
             yield ET.tostring(self._mutate(child, 2)).decode()
 
             # test adding some additional information to the child
-            #yield ET.tostring(self._mutate(child, 3)). decode()
+            yield ET.tostring(self._mutate(child, 3)).decode()
+
+            # test removing the children of this child node
+            yield ET.tostring(self._mutate(child, 4)).decode()
 
         # test adding more nodes
         # yield ET.tostring(self._add(self._xml)).decode()
 
         # test random bitflips on the input
-        for i in range(0, 100000):
-            yield self._bitflip(ET.tostring(self._xml).decode())
+        #for i in range(0, 100000):
+        #    yield self._bitflip(ET.tostring(self._xml).decode())
 
 def xml_fuzzer(binary, inputFile):
     context.log_level = 'WARNING'
