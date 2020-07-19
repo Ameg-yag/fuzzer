@@ -24,3 +24,7 @@ Some details to add about the JSON fuzzer:
 
 
 ## CSV Fuzzer
+Currently the csv fuzzer tries the following to elicit memory corruption:  
+- Sending empty payload 
+- Sending a CSV payload with increasingly number of lines
+- Sending different number of fields (comma seperated values)

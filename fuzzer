@@ -13,7 +13,7 @@ from helper import *
     # 1 = binary name
     # 2 = sampleinput
 
-PATH_TO_SANDBOX = "binaries/" # make empty string for deployment
+PATH_TO_SANDBOX = "" # make empty string for deployment
 
 if (len(sys.argv) != 3):
     sys.exit("Usage: python3 fuzzer.py [binaryName] [sampleInput]")
