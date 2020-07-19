@@ -103,5 +103,4 @@ def xml_fuzzer(binary, inputFile):
     with open(inputFile) as input:
         for test_input in XMLFuzzer(input).generate_input():
             test_payload(binary, test_input)
-            #print(">" + test_input + "\n")
 
