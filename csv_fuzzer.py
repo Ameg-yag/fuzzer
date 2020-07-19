@@ -63,7 +63,7 @@ def csv_fuzzer(binary, inputFile):
 	lines_csv(binary, csv_input)
 	# check fields - can return number of expected fields 
 	fields_csv(binary, csv_input)
-	# bit flipping 
+	# bit flipping
 	# overflowing 
 	# unexcepeted values
 	# 

@@ -1,14 +1,12 @@
-#!/usr/bin/env python3
-
 import sys
 import os
+
 from pwn import *
-import csv 
-import json
 import random
-import xml.etree.ElementTree as ET
-from csv_fuzzer import *
+
 from json_fuzzer import *
+from csv_fuzzer import *
+from xml_fuzzer import *
 from helper import *
 
 # argument error checking
@@ -39,7 +37,7 @@ with open(inputFile) as file:
     if (is_json(file)):
         json_fuzzer(binary, inputFile)
     elif (is_xml(file)):
-        print("Thats xml")
+        xml_fuzzer(binary, inputFile)
     elif (is_csv(file)):
         csv_fuzzer(binary, inputFile)
     else:
