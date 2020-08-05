@@ -34,7 +34,7 @@ def is_xml(file):
 
 def check_process(p,output):
 	p.proc.stdin.close()
-	if p.poll(block=True) < 0:
+	if (p.poll(block=True) == -11):
 		print("Found something... saving to file bad.txt")
 		out = open("./bad.txt", "w")
 		out.writelines(output)
