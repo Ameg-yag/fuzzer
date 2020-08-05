@@ -1,6 +1,6 @@
 # ignore all logs
 *.pyc
+*.txt
 core
 __pycache__/
 test.py
-?.txt
