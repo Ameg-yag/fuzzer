@@ -2,6 +2,9 @@ from pwn import *
 import csv 
 import json
 import xml.etree.ElementTree as ET
+import multiprocessing
+import threading
+
 
 def empty(binary):
 	p = process(binary)
@@ -48,12 +51,17 @@ def get_random_string(length):
     return new_str
 
 def test_payload(binary, payload):
-    p = process(binary)
-    # test payload is byte array
-    try:
-        payload = payload.decode()
-    except (UnicodeDecodeError, AttributeError):
-        exit("payload is not a byte string")
-    p.send(payload)
-    check_process(p, payload)
-    p.close()
+
+    if(threading.current_thread() is threading.main_thread() and threading.activeCount() < multiprocessing.cpu_count()):
+        threading._start_new_thread(test_payload,(binary,payload))
+
+    else:
+        p = process(binary)
+        # test payload is byte array
+        try:
+            payload = payload.decode()
+        except (UnicodeDecodeError, AttributeError):
+            exit("payload is not a byte string")
+        p.send(payload)
+        check_process(p, payload)
+        p.close()
