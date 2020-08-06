@@ -47,7 +47,7 @@ def check_process(p,output):
 		out = open("./bad.txt", "w")
 		out.writelines(output)
 		out.close()
-		exit()
+		os._exit(1)
 
 def get_random_string(length):
     letters = string.ascii_lowercase
