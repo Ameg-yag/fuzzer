@@ -86,7 +86,12 @@ class XMLFuzzer:
             child.set("%x" * 100, "B" * 1000)
             child.set("A" * 1000, "%s" * 100)
             child.set("-" + "1" * 1000, "2" * 1000)
-            child.set(p32(0x41414141), p32(0x00000000))
+
+            # check if 32 or 64 bit.
+            if(ELF(binary).bits == 32):
+                child.set(p32(0x41414141), p32(0x00000000))
+            else:
+                child.set(p64(0x4141414141414141), p64(0x0000000000000000))
 
         # remove all children (grandchildren of root if thats the correct term) from the child
         def _remove_child():
@@ -167,7 +172,7 @@ def xml_fuzzer(binary, inputFile):
         for test_input in XMLFuzzer(input).generate_input():
             print("Testing...")            
             test = open("test.txt", "w")
-            test.writelines(test_input)
+            test.writelines(str(test_input))
             test.close()
 
             try:

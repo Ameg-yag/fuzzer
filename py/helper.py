@@ -25,7 +25,12 @@ def is_csv(file):    # CSV sometimes thinks plaintext == CSV
         csvObj = csv.Sniffer().sniff(file.read(1024))
     except csv.Error:
         return False
-    return True
+
+    if(csv.excel.delimiter == csvObj.delimiter or \
+        csv.excel_tab.delimiter == csvObj.delimiter):
+        return True
+
+    return False
 
 def is_xml(file):
     try:

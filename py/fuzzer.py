@@ -9,6 +9,7 @@ import random
 from json_fuzzer import *
 from csv_fuzzer import *
 from xml_fuzzer import *
+from txt_fuzzer import *
 from helper import *
 
 # argument error checking
