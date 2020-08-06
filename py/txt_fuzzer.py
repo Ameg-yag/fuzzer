@@ -38,9 +38,15 @@ def txt_fuzzer(binary, inputFile):
     # Empty
     empty(binary)
 
+    line_cnt = len(open(inputFile).readlines())
+
     # Overflow
     for i in range(13):
-        test_payload(binary,cyclic(1<<i))
+        payload = b''
+        for _ in range(line_cnt):
+            payload += cyclic(1<<i)+b'\n'
+        test_payload(binary,payload)
+
 
     ## Mutation Based
 
@@ -59,14 +65,12 @@ def txt_fuzzer(binary, inputFile):
             perm_inputs.append(perm_lines)
 
         if(len(perm_inputs)> 1):
-            payloads = itertools.product(perm_inputs[0],perm_inputs[1])
+            payloads = list(itertools.product(*perm_inputs))
         else:
             payloads=perm_inputs[0]
 
-        for payload in payloads:
-            print("".join(payload).encode())
+        for payload in list(payloads):
             test_payload(binary, "".join(payload).encode())
-
     # Mutate everything
 
     with open(inputFile) as f:
@@ -78,15 +82,12 @@ def txt_fuzzer(binary, inputFile):
             perm_inputs.append(perm_lines)
 
         if(len(perm_inputs)> 1):
-            payloads = itertools.product(perm_inputs[0],perm_inputs[1])
+            payloads = list(itertools.product(*perm_inputs))
         else:
             payloads=perm_inputs[0]
 
         for payload in payloads:
-            print("".join(payload).encode())
             test_payload(binary, "".join(payload).encode())
-
-    # generational mutation
 
     # Basic Alphabet Permutation of various lengths
     for i in range(4):
