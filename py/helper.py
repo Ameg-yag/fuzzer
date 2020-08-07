@@ -47,7 +47,7 @@ def check_process(p,output):
 		out = open("./bad.txt", "w")
 		out.writelines(output)
 		out.close()
-		os._exit(1)
+		exit(1)
 
 def get_random_string(length):
     letters = string.ascii_lowercase
@@ -62,11 +62,13 @@ def test_payload(binary, payload):
 
     else:
         p = process(binary)
+        # commented because payload doesn't needed to be unicoded 
         # test payload is byte array
-        try:
-            payload = payload.decode()
-        except (UnicodeDecodeError, AttributeError):
-            exit("payload is not a byte string")
+        # try:
+        #     payload = payload.decode()
+        # except (UnicodeDecodeError, AttributeError):
+        #     exit("payload is not a byte string")
         p.send(payload)
         check_process(p, payload)
         p.close()
+        
