@@ -9,9 +9,10 @@ from pwn import *
 from helper import *
 
 class XMLFuzzer:
-    def __init__(self, input):
+    def __init__(self, input, binary):
         try:
             self._xml = ET.parse(input).getroot()
+            self.binary = binary
         except Exception as e:
             print(e)
 
@@ -88,7 +89,7 @@ class XMLFuzzer:
             child.set("-" + "1" * 1000, "2" * 1000)
 
             # check if 32 or 64 bit.
-            if(ELF(binary).bits == 32):
+            if(ELF(self.binary).bits == 32):
                 child.set(p32(0x41414141), p32(0x00000000))
             else:
                 child.set(p64(0x4141414141414141), p64(0x0000000000000000))
@@ -169,7 +170,7 @@ def xml_fuzzer(binary, inputFile):
     context.log_level = 'WARNING'
 
     with open(inputFile) as input:
-        for test_input in XMLFuzzer(input).generate_input():
+        for test_input in XMLFuzzer(input, binary).generate_input():
             #print("Testing...")            
             #test = open("test.txt", "w")
             #test.writelines(str(test_input))
