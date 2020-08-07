@@ -3,8 +3,6 @@ import csv
 import json
 import xml.etree.ElementTree as ET
 import multiprocessing
-import threading
-
 
 def empty(binary):
 	p = process(binary)
@@ -19,8 +17,7 @@ def is_json(file):
         return False
     return True
 
-def is_csv(file):    # CSV sometimes thinks plaintext == CSV
-    try:
+def is_csv(file):
         file.seek(0)
         csvObj = csv.Sniffer().sniff(file.read(1024))
     except csv.Error:
@@ -45,8 +42,10 @@ def check_process(p,output):
 	if (p.poll(block=True) == -11):
 		print("Found something... saving to file bad.txt")
 		out = open("./bad.txt", "w")
-		out.writelines(output)
+		out.writelines(str(output))
 		out.close()
+		if multiprocessing.current_process().name != 'MainProcess':
+			os.kill(os.getppid(),signal.SIGTERM)
 		exit(1)
 
 def get_random_string(length):
@@ -57,8 +56,10 @@ def get_random_string(length):
 
 def test_payload(binary, payload):
 
-    if(threading.current_thread() is threading.main_thread() and threading.activeCount() < multiprocessing.cpu_count()):
-        threading._start_new_thread(test_payload,(binary,payload))
+    if(len(multiprocessing.active_children()) < multiprocessing.cpu_count() and multiprocessing.current_process().name == 'MainProcess'):
+        p = multiprocessing.Process(target=test_payload,args=(binary,payload))
+        p.daemon=True
+        p.start()
 
     else:
         p = process(binary)
