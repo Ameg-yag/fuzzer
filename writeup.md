@@ -24,3 +24,11 @@ Some details to add about the JSON fuzzer:
 
 
 ## CSV Fuzzer
+
+## Plaintext Fuzzer 
+
+## XML Fuzzer 
+
+# Bonus Marks 
+
+# Future Work
