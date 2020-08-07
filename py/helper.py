@@ -18,6 +18,7 @@ def is_json(file):
     return True
 
 def is_csv(file):
+    try:
         file.seek(0)
         csvObj = csv.Sniffer().sniff(file.read(1024))
     except csv.Error:
