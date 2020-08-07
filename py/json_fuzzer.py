@@ -118,6 +118,16 @@ def overflow_strings_json(binary, json_input):
 	test_payload(binary, payload)
 
 def overflow_integers_json(binary, json_input):
+	keys = list(json_input.keys())
+	for i in range(len(keys)):
+		copy = json_input.copy()
+		try:
+			copy[keys[i]] += 1
+			copy[keys[i]]  = 429496729
+		except TypeError:
+			continue
+		payload = json.dumps(copy).encode('UTF-8')
+		test_payload(binary, payload)
 	copy = json_input.copy()
 	for key in copy.keys():
 		try:
@@ -130,9 +140,10 @@ def overflow_integers_json(binary, json_input):
 
 def get_random_format_string(size):
 	format_string_identifiers = ["%x", "%c", "%d", "%p"]
-	payload = ""
+	payload = b""
 	for i in range(size):
 		payload += random.choice(format_string_identifiers)
+	print(payload)
 	return payload
 
 def format_string_fuzz(binary, json_input):
@@ -142,6 +153,9 @@ def format_string_fuzz(binary, json_input):
 			copy[key] = get_random_format_string(64)
 	payload = json.dumps(copy).encode('UTF-8')
 	test_payload(binary, payload)
+
+#def swap_json_fields(binary, json_input):
+
 
 def json_fuzzer(binary, inputFile):
 	json_input = read_json(inputFile)
@@ -159,7 +173,7 @@ def json_fuzzer(binary, inputFile):
 	nullify_json(binary, json_input)
 	## create extra fields & delete some
 	change_field_amount_json(binary, json_input)
-	## swapping expected types - works for high level and sub dictionaries
+	## swapping expected data types - works for high level and sub dictionaries
 	wrong_type_values_json(binary, json_input)
 	## format strings
 	format_string_fuzz(binary, json_input)
@@ -167,3 +181,5 @@ def json_fuzzer(binary, inputFile):
 	overflow_strings_json(binary, json_input)
 	## overflow integers 
 	overflow_integers_json(binary, json_input)
+	## swap fields
+
