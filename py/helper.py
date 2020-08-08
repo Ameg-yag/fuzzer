@@ -4,6 +4,7 @@ from pwn import *
 import csv
 import json
 import xml.etree.ElementTree as ET
+import multiprocessing
 
 def empty(binary):
 	p = process(binary)
@@ -18,13 +19,18 @@ def is_json(file):
         return False
     return True
 
-def is_csv(file):    # CSV sometimes thinks plaintext == CSV
+def is_csv(file):
     try:
         file.seek(0)
         csvObj = csv.Sniffer().sniff(file.read(1024))
     except csv.Error:
         return False
-    return True
+
+    if(csv.excel.delimiter == csvObj.delimiter or \
+        csv.excel_tab.delimiter == csvObj.delimiter):
+        return True
+
+    return False
 
 def is_xml(file):
     try:
@@ -35,13 +41,18 @@ def is_xml(file):
     return True
 
 def check_process(p,output):
-	p.proc.stdin.close()
-	if (p.poll(block=True) == -11):
-		print("Found something... saving to file bad.txt")
-		out = open("./bad.txt", "w")
-		out.writelines(output)
-		out.close()
-		exit()
+    p.proc.stdin.close()
+    if (p.poll(block=True) == -11):
+        print("Found something... saving to file bad.txt")
+        out = open("./bad.txt", "w")
+        out.writelines(output)
+        out.close()
+        if multiprocessing.current_process().name != 'MainProcess':
+            try:
+                os.kill(os.getppid(),signal.SIGTERM)
+            except PermissionError:
+                sys.exit()
+        sys.exit()
 
 def get_random_string(length):
     letters = string.ascii_lowercase
@@ -50,12 +61,23 @@ def get_random_string(length):
     return new_str
 
 def test_payload(binary, payload):
-    p = process(binary)
-    # test payload is byte array
-    try:
-        payload = payload.decode()
-    except (UnicodeDecodeError, AttributeError):
-		exit("payload is not a byte string")
-	p.send(payload)
-	check_process(p, payload)
-	p.close()
+    # Benchmarking shows that having more processes than cpu cores improves performace, maybe IO bound or waiting while polling
+    if(len(multiprocessing.active_children()) < multiprocessing.cpu_count()*2 and \
+        multiprocessing.current_process().name == 'MainProcess'):
+
+        p = multiprocessing.Process(target=test_payload,args=(binary,payload))
+        p.daemon=True
+        p.start()
+
+    else:
+        p = process(binary)
+        # commented because payload doesn't needed to be unicoded
+        # test payload is byte array
+        if type(payload) != str:
+            try:
+                payload = payload.decode()
+            except (UnicodeDecodeError, AttributeError):
+                exit("payload is not a byte string")
+        p.send(payload)
+        check_process(p, payload)
+        p.close()
