@@ -38,13 +38,30 @@ class XMLFuzzer:
             content.set("a href", "http://" + "%s" * 4 +  ".com")
 
         def _add_overflow():
-            child = ET.SubElement(root, 'div')
             content = ET.SubElement(child, 'a')
             content.set("a href", "https://" + "A" * 0x1000 + ".com")
 
+        def _add_int_overflow():
+            content = ET.SubElement(child, 'a')
+            content.set("a", str(2 ** 65 + 1))
+
+        def _add_int_underflow():
+            content = ET.SubElement(child, 'a')
+            content.set("a", str(2 ** 65))
+
+        def _child_name_overflow():
+            child = ET.SubElement(root, "A" * 0x1000)
+
+        def _child_name_fstring():
+            child = ET.SubElement(root, "%s" * 0x1000)
+
         switch = {
             0: _add_links,
-            1: _add_overflow
+            1: _add_overflow,
+            2: _add_int_overflow,
+            3: _add_int_underflow,
+            4: _child_name_overflow,
+            5: _child_name_fstring
         }
 
         for i in functions:
@@ -52,6 +69,7 @@ class XMLFuzzer:
                 switch.get(i)()
                 root.append(child)
             except Exception as e:
+                print(i)
                 print(e)
 
         return root
@@ -120,18 +138,24 @@ class XMLFuzzer:
         return root
 
     def _replace(self, functions):
-        lines = self._text
+        lines = self._text.decode()
 
-        def _delete_tag():
+        def _delete_open_tag():
             nonlocal lines
             lines = re.sub("<[^>]+>", "", lines)
 
-        def _delete_close():
+        def _delete_close_tag():
             nonlocal lines
-            lines = reb.sub("</[^>]+>")
+            lines = re.sub("</[^>]+>", "", lines)
+
+        def _replace_numbers():
+            nonlocal lines
+            lines = re.sub("\b[0-9]+\b", "1000000000", lines)
 
         switcher = {
-            0: _replace_tags
+            0: _delete_open_tag,
+            1: _delete_close_tag,
+            2: _replace_numbers
         }
 
         for i in functions:
@@ -144,40 +168,48 @@ class XMLFuzzer:
         return lines
 
     def generate_input(self):
-        # # test how the binary reacts to no input
-        # yield ""
+        # test how the binary reacts to no input
+        yield ""
 
-        # ###########################################################
-        # #              Test valid (format) XML data              ##
+        ###########################################################
+        #              Test valid (format) XML data              ##
 
-        # # Test modifying the test input
-        # for child in self._xml:
-        #     # test removing some of the test input
-        #     yield ET.tostring(self._mutate(child, [0])).decode()
+        # Test modifying the test input
+        for child in self._xml:
+            # test removing some of the test input
+            yield ET.tostring(self._mutate(child, [0])).decode()
 
-        #     # test duplicating some nodes
-        #     yield ET.tostring(self._mutate(child, [1])).decode()
+            # test duplicating some nodes
+            yield ET.tostring(self._mutate(child, [1])).decode()
 
-        #     # test duplicating some nodes
-        #     yield ET.tostring(self._mutate(child, [2])).decode()
+            # test duplicating some nodes
+            yield ET.tostring(self._mutate(child, [2])).decode()
 
-        #     # test moving some of the existing nodes around
-        #     yield ET.tostring(self._mutate(child, [3])).decode()
+            # test moving some of the existing nodes around
+            yield ET.tostring(self._mutate(child, [3])).decode()
 
-        #     # test adding some additional information to the child
-        #     yield ET.tostring(self._mutate(child, [4])).decode()
+            # test adding some additional information to the child
+            yield ET.tostring(self._mutate(child, [4])).decode()
 
-        #     # test removing the children of this child node
-        #     yield ET.tostring(self._mutate(child, [5])).decode()
+            # test removing the children of this child node
+            yield ET.tostring(self._mutate(child, [5])).decode()
 
-        #     # test some combinations of the above
-        #     yield ET.tostring(self._mutate(child, [0, 4, 5]))
+            # test some combinations of the above
+            yield ET.tostring(self._mutate(child, [0, 4, 5])).decode()
 
-        # # test adding more nodes
-        # yield ET.tostring(self._add([0])).decode()
+        # test adding more nodes
+        yield ET.tostring(self._add([0])).decode()
 
-        # # test adding a wierd node
-        # yield ET.tostring(self._add([1])).decode()
+        # test adding a wierd node
+        yield ET.tostring(self._add([1])).decode()
+
+        yield ET.tostring(self._add([2])).decode()
+
+        yield ET.tostring(self._add([3])).decode()
+
+        yield ET.tostring(self._add([4])).decode()
+
+        yield ET.tostring(self._add([5])).decode()
 
         ############################################################
 
@@ -185,7 +217,9 @@ class XMLFuzzer:
         ############################################################
         ##             Test invalid (format) XML data             ##
 
-        yield self._replace([0]).decode()
+        yield self._replace([0])
+        yield self._replace([1])
+        yield self._replace([2])
 
         # for i in range(0, 1000):
         #     # test random input (invalid XML)
@@ -201,7 +235,7 @@ def xml_fuzzer(binary, inputFile):
 
     with open(inputFile) as input:
         for test_input in XMLFuzzer(input).generate_input():
-            print("Testing...")
+            print("Testing...", end = '')
             test = open("test.txt", "w")
             test.writelines(test_input)
             test.close()
@@ -213,5 +247,4 @@ def xml_fuzzer(binary, inputFile):
 
             print("Testing succeeded")
 
-    exit(1)
-    #xml_fuzzer(binary, inputFile)
+    xml_fuzzer(binary, inputFile)

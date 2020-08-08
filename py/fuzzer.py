@@ -46,7 +46,6 @@ with open(inputFile) as file:
     else:
         txt_fuzzer(binary, inputFile)
 
-    # Busy wait until workers finsh    
+    # Busy wait until workers finsh
     while(len(multiprocessing.active_children())!=0):
         sleep(1)
-    
