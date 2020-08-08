@@ -28,7 +28,6 @@ class XMLFuzzer:
 
     def _add(self, functions):
         root = copy.deepcopy(self._xml)
-
         child = ET.SubElement(root, 'div')
 
         def _add_links():
@@ -117,9 +116,13 @@ class XMLFuzzer:
     def _replace(self, functions):
         lines = self._text
 
-        def _replace_tags():
+        def _delete_tag():
             nonlocal lines
-            liness = re.sub("</[a-zA-Z]*>", "", lines)
+            lines = re.sub("<[^>]+>", "", lines)
+
+        def _delete_close():
+            nonlocal lines
+            lines = reb.sub("</[^>]+>")
 
         switcher = {
             0: _replace_tags

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from pwn import *
-import csv 
+import csv
 import json
 import xml.etree.ElementTree as ET
 
@@ -35,13 +35,13 @@ def is_xml(file):
     return True
 
 def check_process(p,output):
-    p.proc.stdin.close()
-    if (p.poll(block=True) == -11):
-        print("Found something... saving to file bad.txt")
-	    out = open("./bad.txt", "w")
-	    out.writelines(output)
-	    out.close()
-	    exit()
+	p.proc.stdin.close()
+	if (p.poll(block=True) == -11):
+		print("Found something... saving to file bad.txt")
+		out = open("./bad.txt", "w")
+		out.writelines(output)
+		out.close()
+		exit()
 
 def get_random_string(length):
     letters = string.ascii_lowercase
@@ -55,7 +55,7 @@ def test_payload(binary, payload):
     try:
         payload = payload.decode()
     except (UnicodeDecodeError, AttributeError):
-    exit("payload is not a byte string")
-    p.send(payload)
-    check_process(p, payload)
-    p.close()
+		exit("payload is not a byte string")
+	p.send(payload)
+	check_process(p, payload)
+	p.close()
