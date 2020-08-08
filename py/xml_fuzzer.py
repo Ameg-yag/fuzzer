@@ -74,13 +74,26 @@ class XMLFuzzer:
 
         return root
 
+    """
+    Modifies the provided child node of the test_input and returns the new test input
+
+    @param child        one of the children nodes of the test input
+    @param functions    an array of the following numbers specifying how to mutate
+        0: Remove the child from the root
+        1: Duplicate the child many times at the end of the XML
+        2: Duplicate recursively, appending the child node as a child of itself
+        3: Move the specified child to the end of the input
+        4: Adds some format strings and buffer overflows to the child node
+        5: Removes any children nodes from the specified child
+    """
     def _mutate(self, child, functions):
+
         root = copy.deepcopy(self._xml)     # Don't overwrite the original text
         child = root.find(child.tag)        #
 
         # remove the given node from the root
         def _remove():
-            root.remove(root.find(child.tag))
+            root.remove(child)
 
         # duplicate the given node a random number of times at the end
         def _duplicate():
@@ -167,42 +180,19 @@ class XMLFuzzer:
         ###########################################################
         #              Test valid (format) XML data              ##
 
-        # Test modifying the test input
+        # Modify the test input to still be in the correct format for XML
         for child in self._xml:
-            # test removing some of the test input
-            yield ET.tostring(self._mutate(child, [0])).decode()
-
-            # test duplicating some nodes
-            yield ET.tostring(self._mutate(child, [1])).decode()
-
-            # test duplicating some nodes
-            yield ET.tostring(self._mutate(child, [2])).decode()
-
-            # test moving some of the existing nodes around
-            yield ET.tostring(self._mutate(child, [3])).decode()
-
-            # test adding some additional information to the child
-            yield ET.tostring(self._mutate(child, [4])).decode()
-
-            # test removing the children of this child node
-            yield ET.tostring(self._mutate(child, [5])).decode()
+            for i in range(0, 6):
+                yield ET.tostring(self._mutate(child, [i])).decode()
 
             # test some combinations of the above
             yield ET.tostring(self._mutate(child, [0, 4, 5])).decode()
 
-        # test adding more nodes
-        yield ET.tostring(self._add([0])).decode()
+        # Create some new nodes and add these to the test input
+        for i in range(0, 6):
+            yield ET.tostring(self._add([i])).decode()
 
-        # test adding a wierd node
-        yield ET.tostring(self._add([1])).decode()
-
-        yield ET.tostring(self._add([2])).decode()
-
-        yield ET.tostring(self._add([3])).decode()
-
-        yield ET.tostring(self._add([4])).decode()
-
-        yield ET.tostring(self._add([5])).decode()
+        yield ET.tostring(self._add([0, 1, 2, 3, 4, 5])).decode()
 
         ############################################################
 
@@ -210,16 +200,15 @@ class XMLFuzzer:
         ############################################################
         ##             Test invalid (format) XML data             ##
 
-        yield self._replace([0])
-        yield self._replace([1])
-        yield self._replace([2])
+        for i in range(0, 3):
+            yield self._replace([i])
 
         # for i in range(0, 1000):
         #     # test random input (invalid XML)
         #     yield get_random_string((i + 1) * 10)
-
+        #
         #     # test random bitflips on the test input
-        #     yield self._bitflip()
+        #     yield self._byteflip()
 
         ############################################################
 
@@ -228,6 +217,10 @@ def xml_fuzzer(binary, inputFile):
 
     with open(inputFile) as input:
         for test_input in XMLFuzzer(input).generate_input():
+            out = open("test.txt", "w+")
+            out.writelines(test_input)
+            out.close()
+
             try:
                 test_payload(binary, test_input)
             except Exception as e:
