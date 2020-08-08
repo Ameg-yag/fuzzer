@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from pwn import *
 import csv
 import json
@@ -49,7 +47,7 @@ def check_process(p,output):
         out.close()
         if multiprocessing.current_process().name != 'MainProcess':
             try:
-                os.kill(os.getppid(), signal.SIGTERM)
+                os._exit
             except PermissionError:
                 sys.exit()
         sys.exit()
@@ -70,14 +68,14 @@ def test_payload(binary, payload):
         p.start()
 
     else:
-        p = process(binary)
-        # commented because payload doesn't needed to be unicoded
-        # test payload is byte array
-        if type(payload) != str:
-            try:
-                payload = payload.decode()
-            except (UnicodeDecodeError, AttributeError):
-                exit("payload is not a byte string")
-        p.send(payload)
-        check_process(p, payload)
-        p.close()
+	    p = process(binary)
+	    # commented because payload doesn't needed to be unicoded
+	    # test payload is byte array
+	    if type(payload) != str:
+	        try:
+	            payload = payload.decode()
+	        except (UnicodeDecodeError, AttributeError):
+	            exit("payload is not a byte string")
+	    p.send(payload)
+	    check_process(p, payload)
+	    p.close()

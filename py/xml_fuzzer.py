@@ -106,13 +106,6 @@ class XMLFuzzer:
             child.set("A" * 1000, "%s" * 100)
             child.set("-" + "1" * 1000, "2" * 1000)
 
-            # check if 32 or 64 bit.
-            # if(pbits == 32):
-            #     print("this")
-            #     child.set(p32(0x41414141), p32(0x00000000))
-            # else:
-            #     child.set(p64(0x4141414141414141), p64(0x0000000000000000))
-
         # remove all children (grandchildren of root if thats the correct term) from the child
         def _remove_child():
             for grandchild in child:
@@ -152,7 +145,7 @@ class XMLFuzzer:
             nonlocal lines
             lines = re.sub("\b[0-9]+\b", "1000000000", lines)
 
-        switcher = {
+        switch = {
             0: _delete_open_tag,
             1: _delete_close_tag,
             2: _replace_numbers
@@ -160,7 +153,7 @@ class XMLFuzzer:
 
         for i in functions:
             try:
-                switcher.get(i)()
+                switch.get(i)()
             except Exception as e:
                 print(i)
                 print(e)
@@ -169,33 +162,33 @@ class XMLFuzzer:
 
     def generate_input(self):
         # test how the binary reacts to no input
-        # yield ""
+        yield ""
 
         ###########################################################
         #              Test valid (format) XML data              ##
 
-        # # Test modifying the test input
-        # for child in self._xml:
-        #     # test removing some of the test input
-        #     yield ET.tostring(self._mutate(child, [0])).decode()
-        #
-        #     # test duplicating some nodes
-        #     yield ET.tostring(self._mutate(child, [1])).decode()
-        #
-        #     # test duplicating some nodes
-        #     yield ET.tostring(self._mutate(child, [2])).decode()
-        #
-        #     # test moving some of the existing nodes around
-        #     yield ET.tostring(self._mutate(child, [3])).decode()
-        #
-        #     # test adding some additional information to the child
-        #     yield ET.tostring(self._mutate(child, [4])).decode()
-        #
-        #     # test removing the children of this child node
-        #     yield ET.tostring(self._mutate(child, [5])).decode()
-        #
-        #     # test some combinations of the above
-        #     yield ET.tostring(self._mutate(child, [0, 4, 5])).decode()
+        # Test modifying the test input
+        for child in self._xml:
+            # test removing some of the test input
+            yield ET.tostring(self._mutate(child, [0])).decode()
+
+            # test duplicating some nodes
+            yield ET.tostring(self._mutate(child, [1])).decode()
+
+            # test duplicating some nodes
+            yield ET.tostring(self._mutate(child, [2])).decode()
+
+            # test moving some of the existing nodes around
+            yield ET.tostring(self._mutate(child, [3])).decode()
+
+            # test adding some additional information to the child
+            yield ET.tostring(self._mutate(child, [4])).decode()
+
+            # test removing the children of this child node
+            yield ET.tostring(self._mutate(child, [5])).decode()
+
+            # test some combinations of the above
+            yield ET.tostring(self._mutate(child, [0, 4, 5])).decode()
 
         # test adding more nodes
         yield ET.tostring(self._add([0])).decode()
@@ -217,9 +210,9 @@ class XMLFuzzer:
         ############################################################
         ##             Test invalid (format) XML data             ##
 
-        # yield self._replace([0])
-        # yield self._replace([1])
-        # yield self._replace([2])
+        yield self._replace([0])
+        yield self._replace([1])
+        yield self._replace([2])
 
         # for i in range(0, 1000):
         #     # test random input (invalid XML)
@@ -235,16 +228,7 @@ def xml_fuzzer(binary, inputFile):
 
     with open(inputFile) as input:
         for test_input in XMLFuzzer(input).generate_input():
-            # print("Testing...", end = '')
-            # test = open("test.txt", "w+")
-            # test.writelines(test_input)
-            # test.close()
-
             try:
                 test_payload(binary, test_input)
             except Exception as e:
-                print(e)
-
-            #print("Testing succeeded")
-
-    # xml_fuzzer(binary, inputFile)
+                print("ASDASDASDSA")
