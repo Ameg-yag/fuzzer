@@ -16,6 +16,7 @@ def read_csv(file):
 
 def fields_csv(binary, csv_input):
 	for field_no in range(1, len(csv_input[0]) + 10):
+		expected_field_no = -1
 		p = process(binary)
 		error = []
 		for x in range(len(csv_input)):
@@ -35,7 +36,7 @@ def fields_csv(binary, csv_input):
 					expected_field_no = x
 				break
 			error.append( ','.join(csv_input[x]) + '\n')
-		check_process(p,error)
+		check_segfault(p,error)
 		p.close() 
 	return expected_field_no
 
@@ -52,7 +53,7 @@ def lines_csv(binary, csv_input):
 				p.sendline(','.join(csv_input[len(csv_input) - 1]))
 				error.append( ','.join(csv_input[len(csv_input) - 1]) + '\n')
 
-		check_process(p,error)
+		check_segfault(p,error)
 		p.close()
 
 def csv_fuzzer(binary, inputFile):

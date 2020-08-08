@@ -2,6 +2,7 @@
 
 import sys
 import os
+import logging
 
 from pwn import *
 import random
@@ -33,6 +34,8 @@ if not (os.path.isfile(binary)):
 inputFile = PATH_TO_SANDBOX + sampleInputFileName
 if not (os.path.isfile(inputFile)):
     sys.exit('Sample input does not exist')
+
+context.log_level = logging.CRITICAL
 
 # open files
 # test input to determine input file type
