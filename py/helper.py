@@ -39,15 +39,18 @@ def is_xml(file):
     return True
 
 def check_process(p,output):
-	p.proc.stdin.close()
-	if (p.poll(block=True) == -11):
-		print("Found something... saving to file bad.txt")
-		out = open("./bad.txt", "w")
-		out.writelines(str(output))
-		out.close()
-		if multiprocessing.current_process().name != 'MainProcess':
-			os.kill(os.getppid(),signal.SIGTERM)
-		exit(1)
+    p.proc.stdin.close()
+    if (p.poll(block=True) == -11):
+        print("Found something... saving to file bad.txt")
+        out = open("./bad.txt", "w")
+        out.writelines(str(output))
+        out.close()
+        if multiprocessing.current_process().name != 'MainProcess':
+            try:
+                os.kill(os.getppid(),signal.SIGTERM)
+            except PermissionError:
+                sys.exit()
+        sys.exit()
 
 def get_random_string(length):
     letters = string.ascii_lowercase
@@ -56,8 +59,10 @@ def get_random_string(length):
     return new_str
 
 def test_payload(binary, payload):
+    # Benchmarking shows that having more processes than cpu cores improves performace, maybe IO bound or waiting while polling
+    if(len(multiprocessing.active_children()) < multiprocessing.cpu_count()*2 and \
+        multiprocessing.current_process().name == 'MainProcess'):
 
-    if(len(multiprocessing.active_children()) < multiprocessing.cpu_count() and multiprocessing.current_process().name == 'MainProcess'):
         p = multiprocessing.Process(target=test_payload,args=(binary,payload))
         p.daemon=True
         p.start()

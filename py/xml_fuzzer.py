@@ -88,10 +88,11 @@ class XMLFuzzer:
             child.set("-" + "1" * 1000, "2" * 1000)
 
             # check if 32 or 64 bit.
-            if(ELF(binary).bits == 32):
-                child.set(p32(0x41414141), p32(0x00000000))
-            else:
-                child.set(p64(0x4141414141414141), p64(0x0000000000000000))
+            # if(pbits == 32):
+            #     print("this")
+            #     child.set(p32(0x41414141), p32(0x00000000))
+            # else:
+            #     child.set(p64(0x4141414141414141), p64(0x0000000000000000))
 
         # remove all children (grandchildren of root if thats the correct term) from the child
         def _remove_child():

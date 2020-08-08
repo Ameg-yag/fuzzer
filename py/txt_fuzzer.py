@@ -6,15 +6,15 @@ from helper import *
 import itertools
 
 def alpha_perm(length):
-    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
     return itertools.combinations_with_replacement(alphabet,length)
 
 def num_perm(length):
-    alphabet = "0123456789"
+    alphabet = "0123456789\n"
     return itertools.combinations_with_replacement(alphabet,length)
 
 def alphanum_perm(length):
-    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"
     return itertools.combinations_with_replacement(alphabet,length)
 
 def defined_perm(alphabet, length):
@@ -25,7 +25,6 @@ def defined_num_perm(alphabet, length, start, stop, speed):
         int(alphabet[:-1])
     except ValueError:
         return alphabet[:-1]
-    print("detected: {}",int(alphabet[:-1]))
     return range(start,stop,speed)
 
 def txt_fuzzer(binary, inputFile):
@@ -47,10 +46,15 @@ def txt_fuzzer(binary, inputFile):
             payload += cyclic(1<<i)+b'\n'
         test_payload(binary,payload)
 
+    # Format String
+    with open(inputFile) as f:
+        num_lines = len(f.readlines())
+        payload = b'%10$s %100$s %1000$s %10$p %100$p %1000$p\n'*num_lines
+        test_payload(binary,payload)
 
     ## Mutation Based
 
-    # Mutate numbers only (FAST WIDE SWEEP)
+    # Mutate numbers only (SLOW FINE GRAIN)
 
     with open(inputFile) as f:
         perm_inputs = []
@@ -72,7 +76,7 @@ def txt_fuzzer(binary, inputFile):
         for payload in list(payloads):
             test_payload(binary, "".join(payload).encode())
 
-    # Mutate numbers only (SLOW FINE GRAIN)
+    # Mutate numbers only (FAST WIDE SWEEP)
 
     with open(inputFile) as f:
         perm_inputs = []
@@ -112,14 +116,14 @@ def txt_fuzzer(binary, inputFile):
         for payload in payloads:
             test_payload(binary, "".join(payload).encode())
 
+    # Basic Numeric Permutation of various lengths
+    for i in range(5):
+        for payload in num_perm(i):
+            test_payload(binary,"".join(payload).encode())
+
     # Basic Alphabet Permutation of various lengths
     for i in range(4):
         for payload in alpha_perm(i):
-            test_payload(binary,"".join(payload).encode())
-
-    # Basic Numeric Permutation of various lengths
-    for i in range(4):
-        for payload in num_perm(i):
             test_payload(binary,"".join(payload).encode())
 
     # Basic Alphanumeric Permuation of various lengths
