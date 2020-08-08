@@ -1,8 +1,4 @@
-import sys
-import os
-from pwn import *
-import random 
-from helper import *
+from helper import test_payload, empty, cyclic
 import itertools
 
 def alpha_perm(length):

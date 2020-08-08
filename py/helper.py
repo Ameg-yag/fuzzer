@@ -43,7 +43,7 @@ def check_process(p,output):
     if (p.poll(block=True) == -11):
         print("Found something... saving to file bad.txt")
         out = open("./bad.txt", "w")
-        out.writelines(str(output))
+        out.writelines(output)
         out.close()
         if multiprocessing.current_process().name != 'MainProcess':
             try:
@@ -71,10 +71,11 @@ def test_payload(binary, payload):
         p = process(binary)
         # commented because payload doesn't needed to be unicoded 
         # test payload is byte array
-        # try:
-        #     payload = payload.decode()
-        # except (UnicodeDecodeError, AttributeError):
-        #     exit("payload is not a byte string")
+        if type(payload) != str:
+            try:
+                payload = payload.decode()
+            except (UnicodeDecodeError, AttributeError):
+                exit("payload is not a byte string")
         p.send(payload)
         check_process(p, payload)
         p.close()
