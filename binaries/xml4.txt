@@ -1,15 +1,14 @@
 <html>
     <head>
-        <link href="http://somewebsite.com" />
+        <%s%s%s href="http://somewebsite.com" />
     </head>
     <body>
         <h1>I'm not a web developer.</h1>
     </body>
 
     <div id="#lol">
-        <a href="http://%s%s%s%s.com">Here is some link...</a>
+        <a href="http://google.com">Here is some link...</a>
     </div>
-
 
     <tail>
         <a href="http://bing.com">Footer link</a>
