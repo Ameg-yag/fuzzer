@@ -1,5 +1,6 @@
 from helper import test_payload, empty, cyclic
 import itertools
+from time import sleep
 
 def alpha_perm(length):
     alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
@@ -33,13 +34,43 @@ def txt_fuzzer(binary, inputFile):
     # Empty
     empty(binary)
 
-    line_cnt = len(open(inputFile).readlines())
-
-    # Overflow
+    ## Overflow
+    # Simple Overflow
     for i in range(13):
         payload = b''
-        for _ in range(line_cnt):
+        for _ in range(len(open(inputFile).readlines())):
             payload += cyclic(1<<i)+b'\n'
+        test_payload(binary,payload)
+
+    # Expand Lines
+    with open(inputFile) as f:
+        payload = ''
+        for line in f.readlines():
+            payload += line[:-1]*4+'\n'
+        test_payload(binary,payload)
+
+    # Negate numbers
+    with open(inputFile) as f:
+        payload = ''
+        for line in f.readlines():
+            try:
+                temp = int(line[:-1])
+                temp = str(-temp)
+                payload += temp + '\n'
+            except ValueError:
+                payload += line[:-1]+'\n'
+        test_payload(binary,payload)
+
+    # Negate numbers and expand lines
+    with open(inputFile) as f:
+        payload = ''
+        for line in f.readlines():
+            try:
+                temp = int(line[:-1])
+                temp = str(-temp)
+                payload += temp + '\n'
+            except ValueError:
+                payload += line[:-1]*512+'\n'
         test_payload(binary,payload)
 
     # Format String

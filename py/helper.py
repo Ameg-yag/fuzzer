@@ -5,9 +5,7 @@ import xml.etree.ElementTree as ET
 import multiprocessing
 
 def empty(binary):
-	p = process(binary)
-	p.send("")
-	check_process(p,"")
+    test_payload(binary,"")
 
 def is_json(file):
     try:
