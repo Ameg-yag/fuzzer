@@ -44,8 +44,6 @@ def is_xml(file):
 
 
 def check_segfault(p, output):
-    if isinstance(output, list):
-        output = "".join(output)
     p.proc.stdin.close()
     if p.poll(block=True) == -11:
         print("Found something... saving to file bad.txt")
@@ -66,7 +64,6 @@ def get_random_string(length):
 def test_payload(binary, payload):
     # Prepare payload for sending
     # Send binary and payload into a pool
-
     if not isinstance(payload, str):
         try:
             payload = payload.decode()
@@ -97,8 +94,7 @@ def run_test(binary, payload):
             if multiprocessing.current_process().name != "MainProcess":
                 try:
                     os.kill(os.getppid(), signal.SIGTERM)
-                except PermissionError as e:
-                    print("PermissionError: cant kill!", e)
+                except PermissionError:
                     sys.exit()
             else:
                 sys.exit()
