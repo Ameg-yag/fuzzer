@@ -47,7 +47,7 @@ def check_process(p,output):
         out.close()
         if multiprocessing.current_process().name != 'MainProcess':
             try:
-                sys.exit()
+                exit(0)
             except PermissionError:
                 sys.exit()
         sys.exit()

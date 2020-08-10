@@ -77,14 +77,9 @@ class XMLFuzzer:
     """
     Modifies the provided child node of the test_input and returns the new test input
 
-    @param child        one of the children nodes of the test input
-    @param functions    an array of the following numbers specifying how to mutate
-        0: Remove the child from the root
-        1: Duplicate the child many times at the end of the XML
-        2: Duplicate recursively, appending the child node as a child of itself
-        3: Move the specified child to the end of the input
-        4: Adds some format strings and buffer overflows to the child node
-        5: Removes any children nodes from the specified child
+    child:      one of the children nodes of the test input
+    functions:  an array of integers specifying which of the inner function to use
+                in order to change the data
     """
     def _mutate(self, child, functions):
 
@@ -97,7 +92,7 @@ class XMLFuzzer:
 
         # duplicate the given node a random number of times at the end
         def _duplicate():
-            for i in range(0, random.randint(50, 100)):
+            for i in range(0, random.randint(75, 100)):
                 root.append(copy.deepcopy(child))
 
         # create a line of children nodes starting from the provided child
@@ -124,7 +119,6 @@ class XMLFuzzer:
             for grandchild in child:
                 child.remove(grandchild)
 
-        # Now the code looks messy because python has no switch/case statement. V nice
         switch = {
             0: _remove,
             1: _duplicate,
@@ -158,10 +152,20 @@ class XMLFuzzer:
             nonlocal lines
             lines = re.sub("\b[0-9]+\b", "1000000000", lines)
 
+        def _replace_words():
+            nonlocal lines
+            lines = re.sub("\b[a-zA-Z]+\b", "A" * 0x1000, lines)
+
+        def _replace_links():
+            nonlocal lines
+            lines = re.sub("\"https:[^\"]+.com\"", "https:" + "%s" * 100 + ".com", lines)
+
         switch = {
             0: _delete_open_tag,
             1: _delete_close_tag,
-            2: _replace_numbers
+            2: _replace_numbers,
+            3: _replace_words,
+            4: _replace_links
         }
 
         for i in functions:
@@ -185,14 +189,9 @@ class XMLFuzzer:
             for i in range(0, 6):
                 yield ET.tostring(self._mutate(child, [i])).decode()
 
-            # test some combinations of the above
-            yield ET.tostring(self._mutate(child, [0, 4, 5])).decode()
-
         # Create some new nodes and add these to the test input
         for i in range(0, 6):
             yield ET.tostring(self._add([i])).decode()
-
-        yield ET.tostring(self._add([0, 1, 2, 3, 4, 5])).decode()
 
         ############################################################
 
@@ -200,17 +199,15 @@ class XMLFuzzer:
         ############################################################
         ##             Test invalid (format) XML data             ##
 
-        for i in range(0, 3):
+        for i in range(0, 5):
             yield self._replace([i])
 
-        # for i in range(0, 1000):
-        #     # test random input (invalid XML)
-        #     yield get_random_string((i + 1) * 10)
-        #
-        #     # test random bitflips on the test input
-        #     yield self._byteflip()
+        for i in range(0, 1000):
+            # test random input (invalid XML)
+            yield get_random_string((i + 1) * 10)
 
-        ############################################################
+            # test random bitflips on the test input
+            yield self._byteflip()
 
 def xml_fuzzer(binary, inputFile):
     context.log_level = 'WARNING'
@@ -224,4 +221,4 @@ def xml_fuzzer(binary, inputFile):
             try:
                 test_payload(binary, test_input)
             except Exception as e:
-                print("ASDASDASDSA")
+                print(e)
