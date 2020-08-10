@@ -24,7 +24,7 @@ class XMLFuzzer:
             if random.randint(0, 20) == 1:
                 bytes[i] ^= random.getrandbits(7)
 
-        return bytes.decode('ascii')
+        return bytes.decode("ascii")
 
     def _add(self, functions):
         root = copy.deepcopy(self._xml)
@@ -82,7 +82,6 @@ class XMLFuzzer:
                 in order to change the data
     """
     def _mutate(self, child, functions):
-
         root = copy.deepcopy(self._xml)     # Don't overwrite the original text
         child = root.find(child.tag)        #
 
@@ -125,7 +124,7 @@ class XMLFuzzer:
             2: _duplicate_recursively,
             3: _move,
             4: _add_info,
-            5: _remove_child
+            5: _remove_child,
         }
 
         for i in functions:
@@ -195,7 +194,6 @@ class XMLFuzzer:
 
         ############################################################
 
-
         ############################################################
         ##             Test invalid (format) XML data             ##
 
@@ -209,8 +207,9 @@ class XMLFuzzer:
             # test random bitflips on the test input
             yield self._byteflip()
 
+
 def xml_fuzzer(binary, inputFile):
-    context.log_level = 'WARNING'
+    context.log_level = "WARNING"
 
     with open(inputFile) as input:
         for test_input in XMLFuzzer(input).generate_input():
