@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 from pwn import *
 from helper import *
 
+
 class XMLFuzzer:
     def __init__(self, input):
         try:
@@ -18,7 +19,7 @@ class XMLFuzzer:
             print(e)
 
     def _byteflip(self):
-        bytes = bytearray(ET.tostring(self._xml).decode(), 'UTF-8')
+        bytes = bytearray(self._text.decode(), 'UTF-8')
 
         for i in range(0, len(bytes)):
             if random.randint(0, 20) == 1:
@@ -30,36 +31,37 @@ class XMLFuzzer:
         root = copy.deepcopy(self._xml)
         child = ET.SubElement(root, 'div')
 
-        def _add_links():
-            # Forge some wierd links on a new child node
-            child.set("%s" * 4, "%s" * 4)
-            child.set("id", "%s" * 4)
+        def _link_fstring():
             content = ET.SubElement(child, 'a')
             content.set("a href", "http://" + "%s" * 4 +  ".com")
+            child.append(content)
 
-        def _add_overflow():
+        def _link_overflow():
             content = ET.SubElement(child, 'a')
             content.set("a href", "https://" + "A" * 0x1000 + ".com")
+            child.append(content)
 
-        def _add_int_overflow():
+        def _content_int_overflow():
             content = ET.SubElement(child, 'a')
             content.set("a", str(2 ** 65 + 1))
+            child.append(content)
 
-        def _add_int_underflow():
+        def _content_int_underflow():
             content = ET.SubElement(child, 'a')
-            content.set("a", str(2 ** 65))
+            content.set("a", str((-2) ** 65 + 1))
+            child.append(content)
 
         def _child_name_overflow():
             child = ET.SubElement(root, "A" * 0x1000)
 
         def _child_name_fstring():
-            child = ET.SubElement(root, "%s" * 0x1000)
+            child = ET.SubElement(root, "%s" * 100)
 
         switch = {
-            0: _add_links,
-            1: _add_overflow,
-            2: _add_int_overflow,
-            3: _add_int_underflow,
+            0: _link_fstring,
+            1: _link_overflow,
+            2: _content_int_overflow,
+            3: _content_int_underflow,
             4: _child_name_overflow,
             5: _child_name_fstring
         }
@@ -207,6 +209,7 @@ class XMLFuzzer:
             # test random bitflips on the test input
             yield self._byteflip()
 
+        ############################################################
 
 def xml_fuzzer(binary, inputFile):
     context.log_level = "WARNING"
@@ -221,3 +224,6 @@ def xml_fuzzer(binary, inputFile):
                 test_payload(binary, test_input)
             except Exception as e:
                 print(e)
+    
+    # In case no errors are caught, run 
+    xml_fuzzer(binary, inputFile)
