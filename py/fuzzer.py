@@ -50,6 +50,6 @@ with open(inputFile) as file:
         txt_fuzzer(binary, inputFile)
 
     # Busy wait until workers finsh
-    while len(multiprocessing.active_children()) != 0:
+    while not len(multiprocessing.active_children()):
         sleep(1)
 

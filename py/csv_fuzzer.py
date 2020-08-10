@@ -17,20 +17,19 @@ def read_csv(file):
 
 
 def fields_csv(binary, csv_input):
+    expected_field_no = -1
     for field_no in range(1, len(csv_input[0]) + 10):
-        expected_field_no = -1
-        p = process(binary)
         error = []
         for x in range(len(csv_input)):
             n = len(csv_input[x])
             if field_no < n:
-                for i in range(0, n - field_no):
+                for _ in range(0, n - field_no):
                     csv_input[x].pop()
             else:
-                for i in range(n, field_no):
+                for _ in range(n, field_no):
                     csv_input[x].append("A")
             try:
-                p.sendline(",".join(csv_input[x]))
+                test_payload(binary, ",".join(csv_input[x]))
             except:
                 if x > 0:
                     # assumption that sending multiple lines is accpeted no of fields
@@ -38,26 +37,23 @@ def fields_csv(binary, csv_input):
                     expected_field_no = x
                 break
             error.append(",".join(csv_input[x]) + "\n")
-        check_segfault(p, error)
-        p.close()
+        test_payload(binary, "".join(error))
     return expected_field_no
 
 
 # Check if a enough CSV lines will crash the program
 def lines_csv(binary, csv_input):
     for length in range(0, 1000, 100):
-        p = process(binary)
         error = []
         for l in range(0, length):
             if l < len(csv_input):
-                p.sendline(",".join(csv_input[l]))
+                test_payload(binary, ",".join(csv_input[l]))
                 error.append(",".join(csv_input[l]) + "\n")
             else:
-                p.sendline(",".join(csv_input[len(csv_input) - 1]))
+                test_payload(binary, ",".join(csv_input[len(csv_input) - 1]))
                 error.append(",".join(csv_input[len(csv_input) - 1]) + "\n")
 
-        check_segfault(p, error)
-        p.close()
+        test_payload(binary, "".join(error))
 
 
 def csv_fuzzer(binary, inputFile):
