@@ -9,7 +9,6 @@ import xml.etree.ElementTree as ET
 from pwn import *
 from helper import *
 
-
 class XMLFuzzer:
     def __init__(self, input):
         try:
@@ -33,29 +32,27 @@ class XMLFuzzer:
 
         def _link_fstring():
             content = ET.SubElement(child, 'a')
-            content.set("a href", "http://" + "%s" * 4 +  ".com")
-            child.append(content)
+            content.set("href", "http://" + "%s" * 0x10 +  ".com")
 
         def _link_overflow():
             content = ET.SubElement(child, 'a')
-            content.set("a href", "https://" + "A" * 0x1000 + ".com")
-            child.append(content)
+            content.set("href", "https://" + "A" * 0x1000 + ".com")
 
         def _content_int_overflow():
             content = ET.SubElement(child, 'a')
             content.set("a", str(2 ** 65 + 1))
-            child.append(content)
+            content.set(str(2 ** 65 + 1), "b")
 
         def _content_int_underflow():
             content = ET.SubElement(child, 'a')
-            content.set("a", str((-2) ** 65 + 1))
-            child.append(content)
+            content.set("a", str(2 ** 65))
+            content.set(str(2 ** 65), "b")
 
         def _child_name_overflow():
-            child = ET.SubElement(root, "A" * 0x1000)
+            child.tag = "A" * 0x1000
 
         def _child_name_fstring():
-            child = ET.SubElement(root, "%s" * 100)
+            child.tag = "%s" * 0x10
 
         switch = {
             0: _link_fstring,
@@ -69,7 +66,6 @@ class XMLFuzzer:
         for i in functions:
             try:
                 switch.get(i)()
-                root.append(child)
             except Exception as e:
                 print(i)
                 print(e)
@@ -99,21 +95,21 @@ class XMLFuzzer:
         # create a line of children nodes starting from the provided child
         def _duplicate_recursively():
             _root = child
-            for i in range(0, random.randint(50, 100)):
+            for i in range(0, random.randint(75, 100)):
                 _child = copy.deepcopy(_root)
+                _child.tag = str(random.randint(0, 10000))
                 _root.append(_child)
-                _root = _child
+                _root = _root.find(_child.tag)
 
         # move the given node to the end of the input
         def _move():
             root.remove(root.find(child.tag))
             root.append(copy.deepcopy(child))
 
-        # Add some more information to each node
+        # Add some unexpected info to the node
         def _add_info():
             child.set("%x" * 100, "B" * 1000)
             child.set("A" * 1000, "%s" * 100)
-            child.set("-" + "1" * 1000, "2" * 1000)
 
         # remove all children (grandchildren of root if thats the correct term) from the child
         def _remove_child():
@@ -159,7 +155,7 @@ class XMLFuzzer:
 
         def _replace_links():
             nonlocal lines
-            lines = re.sub("\"https:[^\"]+.com\"", "https:" + "%s" * 100 + ".com", lines)
+            lines = re.sub("\"https:[^\"]+.com\"", "%s" * 100, lines)
 
         switch = {
             0: _delete_open_tag,
@@ -209,21 +205,17 @@ class XMLFuzzer:
             # test random bitflips on the test input
             yield self._byteflip()
 
-        ############################################################
+        ###########################################################
 
 def xml_fuzzer(binary, inputFile):
     context.log_level = "WARNING"
 
     with open(inputFile) as input:
         for test_input in XMLFuzzer(input).generate_input():
-            out = open("test.txt", "w+")
-            out.writelines(test_input)
-            out.close()
-
             try:
                 test_payload(binary, test_input)
             except Exception as e:
                 print(e)
     
-    # In case no errors are caught, run 
+    # In case no errors are caught, run again
     xml_fuzzer(binary, inputFile)

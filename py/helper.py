@@ -80,9 +80,7 @@ def test_payload(binary, payload):
     else:
         run_test(binary, payload)
 
-
 def run_test(binary, payload):
-
     with process(binary) as p:
         # commented because payload doesn't needed to be unicoded
         # test payload is byte array
@@ -90,7 +88,8 @@ def run_test(binary, payload):
         if check_segfault(p, payload):
             if multiprocessing.current_process().name != "MainProcess":
                 try:
-                    os.kill(os.getppid(), signal.SIGTERM)
+                    # os.kill(os.getppid(), signal.SIGTERM)
+                    sys.exit()
                 except PermissionError:
                     sys.exit()
             else:
