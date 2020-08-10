@@ -150,10 +150,9 @@ def overflow_integers_json(binary, json_input):
 
 def get_random_format_string(size):
 	format_string_identifiers = ["%x", "%c", "%d", "%p"]
-	payload = b""
+	payload = ""
 	for i in range(size):
 		payload += random.choice(format_string_identifiers)
-	print(payload)
 	return payload
 
 def format_string_fuzz(binary, json_input):
@@ -164,32 +163,40 @@ def format_string_fuzz(binary, json_input):
 	payload = json.dumps(copy).encode('UTF-8')
 	test_payload(binary, payload)
 
-#def swap_json_fields(binary, json_input):
+def swap_json_fields(binary, json_input):
+    fields = []
+    for entry in json_input:
+        fields.append(json_input[entry])
+    copy = json_input.copy()
+    for entry in copy:
+        copy[entry] = random.choice(fields)
+    payload = json.dumps(copy).encode('UTF-8')
+    test_payload(binary, payload)
 
 
 def json_fuzzer(binary, inputFile):
-	json_input = read_json(inputFile)
+    json_input = read_json(inputFile)
 
-	# dumb fuzzing
-	## check empty payload
-	empty(binary)
-	## invalid json
-	invaild_json(binary)
-	## lots of random fields and things
-	random_json(binary)
+    # dumb fuzzing
+    ## check empty payload
+    empty(binary)
+    ## invalid json
+    invaild_json(binary)
+    ## lots of random fields and things
+    random_json(binary)
 
-	# smart fuzzing
-	## nullify fields - zero and empty strings
-	nullify_json(binary, json_input)
-	## create extra fields & delete some
-	change_field_amount_json(binary, json_input)
-	## swapping expected data types - works for high level and sub dictionaries
-	wrong_type_values_json(binary, json_input)
-	## format strings
-	format_string_fuzz(binary, json_input)
-	## overflow strings 
-	overflow_strings_json(binary, json_input)
-	## overflow integers 
-	overflow_integers_json(binary, json_input)
-	## swap fields
-
+    # smart fuzzing
+    ## nullify fields - zero and empty strings
+    nullify_json(binary, json_input)
+    ## create extra fields & delete some
+    change_field_amount_json(binary, json_input)
+    ## swapping expected data types - works for high level and sub dictionaries
+    wrong_type_values_json(binary, json_input)
+    ## format strings
+    format_string_fuzz(binary, json_input)
+    ## overflow strings 
+    overflow_strings_json(binary, json_input)
+    ## overflow integers 
+    overflow_integers_json(binary, json_input)
+    ## swap fields
+    swap_json_fields(binary, json_input)
