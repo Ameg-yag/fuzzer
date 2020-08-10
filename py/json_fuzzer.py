@@ -102,8 +102,9 @@ def random_json(binary):
             d[get_random_string(5)] = randint(0, 1024)
         elif chance == 3:
             d[get_random_string(5)] = deep_nested_json({}, 32)
-    payload = json.dumps(d).encode("UTF-8")
-    test_payload(binary, payload)
+    if (binary):
+        payload = json.dumps(d).encode("UTF-8")
+        test_payload(binary, payload)
 
 
 def deep_nested_json(dictionary, length):
@@ -116,15 +117,16 @@ def deep_nested_json(dictionary, length):
 
 def overflow_strings_json(binary, json_input):
     copy = json_input.copy()
-    for key in copy.keys():
-        try:
-            copy[key] += 1
-            copy[key] -= 1
-        except TypeError:
-            if type(copy[key]) is str:
-                copy[key] = get_random_string(1025)
-    payload = json.dumps(copy).encode("UTF-8")
-    test_payload(binary, payload)
+    for i in range(1000, 12000, 200):
+        for key in copy.keys():
+            try:
+                copy[key] += 1
+                copy[key] -= 1
+            except TypeError:
+                if type(copy[key]) is str:
+                    copy[key] = get_random_string(i)
+        payload = json.dumps(copy).encode("UTF-8")
+        test_payload(binary, payload)
 
 
 def overflow_integers_json(binary, json_input):
@@ -156,12 +158,14 @@ def get_random_format_string(size):
 	return payload
 
 def format_string_fuzz(binary, json_input):
-	copy = json_input.copy()
-	for key in copy.keys():
-		if type(copy[key]) is str:
-			copy[key] = get_random_format_string(64)
-	payload = json.dumps(copy).encode('UTF-8')
-	test_payload(binary, payload)
+    copy = json_input.copy()
+    for key in copy.keys():
+        if type(copy[key]) is str:
+            copy[key] = get_random_format_string(64)
+        elif type(copy[key]) is int:
+            copy[key] = 429496730
+    payload = json.dumps(copy).encode('UTF-8')
+    test_payload(binary, payload)
 
 def swap_json_fields(binary, json_input):
     fields = []
@@ -173,6 +177,29 @@ def swap_json_fields(binary, json_input):
     payload = json.dumps(copy).encode('UTF-8')
     test_payload(binary, payload)
 
+def random_types(binary, json_input):
+    types = ["string", "boolean", "int", "none", "float", "list", "dict"]
+    for i in range(12):
+        copy = json_input.copy()
+        for key in copy.keys():
+            choice = random.choice(types)
+            if (choice == "string"):
+                copy[key] = get_random_string(randint(16, 12000))
+            elif (choice == "boolean"):
+                copy[key] = random.choice([True, False])
+            elif (choice == "int"):
+                copy[key] = randint(-429496729, 429496729)
+            elif (choice == "none"):
+                copy[key] = None
+            elif (choice == "list"):
+                copy[key] = list(range(randint(-64, 0), randint(0, 64)))
+            elif (choice == "float"):
+                copy[key] = random.uniform(-32, 32)
+            elif (choice == "dict"):
+                copy[key] = random_json(False)
+        payload = json.dumps(copy).encode('UTF-8')
+        print(payload)
+        test_payload(binary, payload)
 
 def json_fuzzer(binary, inputFile):
     json_input = read_json(inputFile)
@@ -200,3 +227,5 @@ def json_fuzzer(binary, inputFile):
     overflow_integers_json(binary, json_input)
     ## swap fields
     swap_json_fields(binary, json_input)
+    ## random type assignment
+    random_types(binary, json_input)
