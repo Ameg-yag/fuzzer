@@ -2,11 +2,13 @@ from pwn import *
 import csv
 import json
 import xml.etree.ElementTree as ET
-import multiprocessing
+import multiprocessing as MP
+
+global processes
+processes = []
 
 def empty(binary):
     test_payload(binary, "")
-
 
 def is_json(file):
     try:
@@ -15,7 +17,6 @@ def is_json(file):
     except ValueError as e:
         return False
     return True
-
 
 def is_csv(file):
     try:
@@ -32,7 +33,6 @@ def is_csv(file):
 
     return False
 
-
 def is_xml(file):
     file.seek(0)
     try:
@@ -40,7 +40,6 @@ def is_xml(file):
     except Exception:
         return False
     return True
-
 
 def check_segfault(p, output):
     p.proc.stdin.close()
@@ -68,12 +67,8 @@ def test_payload(binary, payload):
             exit("payload is not a byte string")
 
     # Benchmarking shows that having more processes than cpu cores improves performace, maybe IO bound or waiting while polling
-    if (
-        len(multiprocessing.active_children()) < multiprocessing.cpu_count() * 2
-        and multiprocessing.current_process().name == "MainProcess"
-    ):
-
-        p = multiprocessing.Process(target=test_payload, args=(binary, payload))
+    if ((len(MP.active_children()) < (MP.cpu_count() * 2)) and (MP.current_process().name == "MainProcess")):
+        p = MP.Process(target=test_payload, args=(binary, payload))
         p.daemon = True
         p.start()
 
@@ -86,10 +81,9 @@ def run_test(binary, payload):
         # test payload is byte array
         p.send(payload)
         if check_segfault(p, payload):
-            if multiprocessing.current_process().name != "MainProcess":
+            if MP.current_process().name != "MainProcess":
                 try:
-                    # os.kill(os.getppid(), signal.SIGTERM)
-                    sys.exit()
+                    os.kill(os.getppid(), signal.SIGTERM)
                 except PermissionError:
                     sys.exit()
             else:

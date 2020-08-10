@@ -26,7 +26,7 @@ class XMLFuzzer:
 
         return bytes.decode("ascii")
 
-    def _add(self, functions):
+    def _add_node(self, functions):
         root = copy.deepcopy(self._xml)
         child = ET.SubElement(root, 'div')
 
@@ -40,13 +40,13 @@ class XMLFuzzer:
 
         def _content_int_overflow():
             content = ET.SubElement(child, 'a')
-            content.set("a", str(2 ** 65 + 1))
-            content.set(str(2 ** 65 + 1), "b")
+            content.set("a", str(2 ** 31))
+            content.set(str(2 ** 31), "b")
 
         def _content_int_underflow():
             content = ET.SubElement(child, 'a')
-            content.set("a", str(2 ** 65))
-            content.set(str(2 ** 65), "b")
+            content.set("a", str(-2 ** 31))
+            content.set(str(-2 ** 31), "b")
 
         def _child_name_overflow():
             child.tag = "A" * 0x1000
@@ -60,8 +60,7 @@ class XMLFuzzer:
             2: _content_int_overflow,
             3: _content_int_underflow,
             4: _child_name_overflow,
-            5: _child_name_fstring
-        }
+            5: _child_name_fstring }
 
         for i in functions:
             try:
@@ -79,7 +78,7 @@ class XMLFuzzer:
     functions:  an array of integers specifying which of the inner function to use
                 in order to change the data
     """
-    def _mutate(self, child, functions):
+    def _mutate_node(self, child, functions):
         root = copy.deepcopy(self._xml)     # Don't overwrite the original text
         child = root.find(child.tag)        #
 
@@ -134,7 +133,7 @@ class XMLFuzzer:
 
         return root
 
-    def _replace(self, functions):
+    def _replace_text(self, functions):
         lines = self._text.decode()
 
         def _delete_open_tag():
@@ -179,24 +178,24 @@ class XMLFuzzer:
         yield ""
 
         ###########################################################
-        #              Test valid (format) XML data              ##
+        ##             Test valid (format) XML data              ##
 
         # Modify the test input to still be in the correct format for XML
         for child in self._xml:
             for i in range(0, 6):
-                yield ET.tostring(self._mutate(child, [i])).decode()
+                yield ET.tostring(self._mutate_node(child, [i])).decode()
 
         # Create some new nodes and add these to the test input
         for i in range(0, 6):
-            yield ET.tostring(self._add([i])).decode()
+            yield ET.tostring(self._add_node([i])).decode()
 
-        ############################################################
+        ###########################################################
 
         ############################################################
         ##             Test invalid (format) XML data             ##
 
         for i in range(0, 5):
-            yield self._replace([i])
+            yield self._replace_text([i])
 
         for i in range(0, 1000):
             # test random input (invalid XML)
@@ -212,10 +211,13 @@ def xml_fuzzer(binary, inputFile):
 
     with open(inputFile) as input:
         for test_input in XMLFuzzer(input).generate_input():
+            with open("test.txt", "w+") as out:
+                out.write(test_input)
+
             try:
                 test_payload(binary, test_input)
             except Exception as e:
                 print(e)
-    
+
     # In case no errors are caught, run again
-    xml_fuzzer(binary, inputFile)
+    # xml_fuzzer(binary, inputFile)
