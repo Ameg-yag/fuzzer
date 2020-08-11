@@ -48,7 +48,37 @@ The XML Fuzzer is currently in early stages of development, but so far it has th
 - Attempted to add functionality to include unexpected data to valid tags (e.g. format strings in attributes)
 
 ## Plaintext fuzzer
+The plaintext fuzzer is similar to other fuzzers but has an additional functionality unique to plaintext files: multiple lines.
+Due to the potential of multiple lines, additional processing is taken into consideration to maximise code coverage.
+The plaintext fuzzer analyses how many lines are provided and performs fuzzing of each line individually.
+The dumb fuzzing functionalities provided are:
+- The generation of proceedurally increasing random string inputs
+- The generation of proceedurally increasing random numeric inputs
+- Format string
+- Permutation of all potential 5 digit numbers
+- Permutation of all potential 4 character strings
+- Permutation of all potential 4 character alphanumeric strings
+The smart fuzzing functionalities provided are:
+- Duplication
+- Negation of numbers
+- Duplication and negation
+- Mutation of digits in both large range and fine differences
+- Permutation of provided input
 
 ## Bonus Marks
 
 # Future Work
+Currently, the implementation of multiprocessing is hampered by the limits of Python3, that is asynchronous events are not handled robustly,
+and the multiprocessing library makes interprocess communication more difficult than it should be. With the advent of Python4 and the asyncio library,
+future work would include obsoleting the multiprocessing library in favour of asyncio for better performance and interprocess communication to prevent
+racing between processes, locks of files (namely bad.txt), and graceful exiting of all processes.
+
+Currently, there are no systems in place for intellegently checking code coverage for a more powerful input selection during fuzzing. An implementation 
+of code coverage checking and evolutionary algorithms can help discover more powerful payloads more quickly.
+
+Currently, there is no system for checking the time taken for each test to intellegently adapt the breadth of duzz fuzzing algorithms. If it can be 
+observed that fuzzing is being completed too slowly due to a larger binary or slower computation, sample spaces should be reduced. Similarly, if 
+fuzzing is completed quickly, sample spaces could be expanded.
+
+Currently, CPU utilisation is not monitored and the limit of processes spawned at any moment is hardcoded. If it can be observed that CPU utilisation is 
+not maximised, potentially due to processes blocking/waiting additional processes could be run to maximise performance.

@@ -1,6 +1,7 @@
 import itertools
 import logging
 import sys
+from pwn import flat
 from time import sleep
 from helper import test_payload, empty, cyclic
 
@@ -49,7 +50,15 @@ def txt_fuzzer(binary, inputFile):
         num_lines = len(lines)
 
     ## Overflow
-    # Simple Overflow
+
+    # Simple Overflow (Numeric)
+    for i in range(31):
+        payload = b""
+        for _ in lines:
+            payload += flat(str(1 << i)) + b"\n"
+        test_payload(binary, payload)
+
+    # Simple Overflow (Text)
     for i in range(13):
         payload = b""
         for _ in lines:
