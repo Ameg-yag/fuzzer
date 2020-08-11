@@ -51,6 +51,7 @@ The XML Fuzzer is currently in early stages of development, but so far it has th
 The plaintext fuzzer is similar to other fuzzers but has an additional functionality unique to plaintext files: multiple lines.
 Due to the potential of multiple lines, additional processing is taken into consideration to maximise code coverage.
 The plaintext fuzzer analyses how many lines are provided and performs fuzzing of each line individually.
+
 The dumb fuzzing functionalities provided are:
 - The generation of proceedurally increasing random string inputs
 - The generation of proceedurally increasing random numeric inputs
@@ -58,6 +59,7 @@ The dumb fuzzing functionalities provided are:
 - Permutation of all potential 5 digit numbers
 - Permutation of all potential 4 character strings
 - Permutation of all potential 4 character alphanumeric strings
+
 The smart fuzzing functionalities provided are:
 - Duplication
 - Negation of numbers
