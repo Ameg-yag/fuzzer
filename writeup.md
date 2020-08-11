@@ -28,7 +28,10 @@ Some details to add about the JSON fuzzer:
 - All variants of ints are sent, floats, large, small, 0 and negative
 
 The JSON fuzzer fuzzes at a size range which seems reasonable to elicit memory corruption, however, these values could be easily changed which may increase 
-the fuzzers effectiveness depending on the types of binaries the fuzzer is being used and tested against.
+the fuzzers effectiveness depending on the types of binaries the fuzzer is being used and tested against. More variants on the data implemented in the fuzzing
+process may prove valuable if the data has an effect on processing. The fuzzer attacks well-known vulnerabilties attempting to break the binaries with
+input that should affect the processing of the process. To expand upon this fuzzer, you may look to increase the versatility and improve the breadth of fuzzing
+attempts to target very infrequent bugs.
 
 
 
