@@ -198,7 +198,6 @@ def random_types(binary, json_input):
             elif (choice == "dict"):
                 copy[key] = random_json(False)
         payload = json.dumps(copy).encode('UTF-8')
-        print(payload)
         test_payload(binary, payload)
 
 def json_fuzzer(binary, inputFile):
