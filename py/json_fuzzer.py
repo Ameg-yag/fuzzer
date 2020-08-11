@@ -201,7 +201,7 @@ def random_types(binary, json_input):
                 copy[key] = random.uniform(-128, 128)
             elif choice == "dict":
                 copy[key] = random_json(False)
-        payload = json.dumps(copy).encode("UTF-8")
+        payload = json.dumps(copy).encode('UTF-8')
         test_payload(binary, payload)
 
 
