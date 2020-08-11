@@ -78,7 +78,7 @@ racing between processes, locks of files (namely bad.txt), and graceful exiting 
 Currently, there are no systems in place for intellegently checking code coverage for a more powerful input selection during fuzzing. An implementation 
 of code coverage checking and evolutionary algorithms can help discover more powerful payloads more quickly.
 
-Currently, there is no system for checking the time taken for each test to intellegently adapt the breadth of duzz fuzzing algorithms. If it can be 
+Currently, there is no system for checking the time taken for each test to intellegently adapt the breadth of dumb fuzzing algorithms. If it can be 
 observed that fuzzing is being completed too slowly due to a larger binary or slower computation, sample spaces should be reduced. Similarly, if 
 fuzzing is completed quickly, sample spaces could be expanded.
 
