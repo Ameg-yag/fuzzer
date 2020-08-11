@@ -84,12 +84,13 @@ def overflow_fields(binary, csv_input, delimiter):
         test_payload(binary, payload)
 
 def format_string(binary, csv_input, delimiter):
-    payload = delimiter.join(csv_input[0]) + '\n'
-    for l in range(1, len(csv_input)):
-        for w in csv_input[l]:   
-            payload += "%p"*32 + delimiter
-        payload = payload[:-1] + "\n"
-    test_payload(binary, payload)
+    for x in ["%p", "%s"]:
+        payload = delimiter.join(csv_input[0]) + '\n'
+        for l in range(1, len(csv_input)):
+            for w in csv_input[l]:   
+                payload += x*32 + delimiter
+            payload = payload[:-1] + "\n"
+        test_payload(binary, payload)
 
 def change_header(binary, csv_input, delimiter):
     payload = ''
@@ -156,9 +157,9 @@ def csv_fuzzer(binary, inputFile):
     # invalid csv - remove all delimiters 
     remove_delimiters(binary, csv_input, delimiter)
     # check number of lines
-    lines_csv(binary, csv_input, delimiter)
+    #lines_csv(binary, csv_input, delimiter)
     # check fields - can return number of expected fields
-    fields_csv(binary, csv_input, delimiter)
+    #fields_csv(binary, csv_input, delimiter)
     # change delimiters
     change_delimiters(binary, csv_input)
     # overflowing fields with string 
