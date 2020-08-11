@@ -70,6 +70,18 @@ def change_delimiters(binary, csv_input):
             payload += x.join(csv_input[l]) + '\n'
         test_payload(binary, payload)
 
+def overflow_fields(binary, csv_input):
+    for x in range(32, 1000, 32):
+        payload = ",".join(csv_input[0]) + '\n'
+        for l in range(1, len(csv_input)):
+            for w in csv_input[l]:
+                
+                payload += "A"*x 
+                payload += ","
+            payload = payload[:-1] + "\n"
+        test_payload(binary, payload)
+
+
 
 def csv_fuzzer(binary, inputFile):
     csv_input = read_csv(inputFile)
@@ -78,16 +90,17 @@ def csv_fuzzer(binary, inputFile):
     # invalid csv - remove all delimiters 
     remove_delimiters(binary, csv_input)
     # check number of lines
-    lines_csv(binary, csv_input)
+    #lines_csv(binary, csv_input)
     # check fields - can return number of expected fields
-    fields_csv(binary, csv_input)
+    #fields_csv(binary, csv_input)
     # change delimiters
     change_delimiters(binary, csv_input)
     # bit flipping
-    
-    # overflowing
-    
+
     # unexcepeted values
+
+    # overflowing
+    overflow_fields(binary, csv_input)
 
     # string format 
 
