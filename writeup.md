@@ -47,12 +47,22 @@ The csv fuzzer tries the following to elicit memory corruption:
 
 
 ## XML Fuzzer
-The XML Fuzzer is currently in early stages of development, but so far it has the following functionality
-- Sending non-XML test data (empty string, basic small string (e.g. "ABC") and a very large string ("ABC" * 1000))
-- Mutating the supplied test data to attempt to have it a parse an invalid (but in a valid enough format) XML file
-    - Removing children nodes, or children of those children nodes
-    - Moving the order of children nodes, or duplicating them
-- Attempted to add functionality to include unexpected data to valid tags (e.g. format strings in attributes)
+The XML Fuzzer follows two different paths, firstly it attempts to provide valid XML that has some unexpected data values. Secondly, it attempted to provide invalid XML, either by modifying the test input and replacing or removing parts of it, or by simply sending non-XML data. This can be some of the following:
+
+1. Modifying nodes of the test input.
+    * the main exploit in this section was the duplication of a given child node, either appending it to the end of the root node, or recursively appending it as a child of itself (an attempt at a shoddy 'billion laughs' attack)
+    * the other exploit in this section was to modify children nodes to contain some data (such as a format string or a attempted buffer overflow) that would be parsed by incorrectly. This was also performed later when creating new nodes however I was unsure what form the nodes would need to be in so I thought this could be beneficial.
+
+2. Creating entirely new nodes and inserting these into the test input, This provided far more flexibility than the modification of provided nodes, however it also meant that there is no guarantee that the new nodes would be of the correct form to be parsed and to exploit the program.
+    * The creation of new nodes specifically attempts to exploit buffer overflows and format strings in the names, attributes, and links of a node. To this extent it is a bit underwhelming and surely could be expanded upon. It has a small amount of functionality to attempt integer overflows in some of the content fields for nodes, however this could have been expanded significantly.
+
+3. Reading the test input and replacing or removing parts of it (leaving the input in an invalid state)
+    * Removing tags (opening and closing) from the document in an attempt to have the input parsed incorrectly.
+    * Replacing text within the document with a huge number of characters in an attempt to overflow the buffer that text is placed in. This will replace all of the text, there could have been an option to replace each part of the text independently which may have bypassed some checks.
+    * Replacing numbers within the document very large numbers in an attempt to either change the amount of storage being allocated, or to attempt to have the numbers cause an integer over/underflow.
+
+4. Finally, the fuzzer provides some byteflipping just as a last effort to find any bugs that weren't caught by any of the previous checks. Following this it attempts to just send some random strings in an attempt to pass the checks for correct data and have the XML be parsed incorrectly.
+
 
 ## Plaintext fuzzer
 The plaintext fuzzer is similar to other fuzzers but has an additional functionality unique to plaintext files: multiple lines.
