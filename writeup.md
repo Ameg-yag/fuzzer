@@ -19,10 +19,17 @@ For areas of dumb fuzzing, we have tried to factor the code so code duplication 
 # Specific fuzzer implementation details
 ## JSON Fuzzer
 Some details to add about the JSON fuzzer:
-- Incorporated a nested dictionary test data input (incase of binary loops)
-- checks majority of the common security error ideas (previously listed @Design Approach)
-- Creates effective random json files which use specific keys given by the input json exmaple.
+- Incorporated a nested dictionary test data input (incase of loops in binary's input)
+- Checks majority of the common security error ideas (previously listed @Design Approach)
+- Creates effective random json files which use specific keys (smart fuzzing) given by the input json example.
+- Sends empty, garbage variants of data (dumb fuzzing)
 - Utilises "None" type available to JSON formatting.
+- Format strings, overflows and type misconfigurations are all checked
+- All variants of ints are sent, floats, large, small, 0 and negative
+
+The JSON fuzzer fuzzes at a size range which seems reasonable to elicit memory corruption, however, these values could be easily changed which may increase 
+the fuzzers effectiveness depending on the types of binaries the fuzzer is being used and tested against.
+
 
 
 ## CSV Fuzzer
