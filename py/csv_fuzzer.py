@@ -157,7 +157,7 @@ def byte_flip(binary, csv_input, delimiter):
     payload = ""
     freq = random.randrange(1, 20)
     for l in range(0, len(csv_input)):
-        for _ in range(0, len(csv_input[l])):
+        for w in range(0, len(csv_input[l])):
             payload += csv_input[l][w] + delimiter
         payload = payload[:-1] + "\n"
     payload = bytearray(payload, "UTF-8")
