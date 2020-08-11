@@ -179,7 +179,7 @@ def swap_json_fields(binary, json_input):
 
 def random_types(binary, json_input):
     types = ["string", "boolean", "int", "none", "float", "list", "dict"]
-    for i in range(12):
+    for i in range(100):
         copy = json_input.copy()
         for key in copy.keys():
             choice = random.choice(types)
@@ -194,7 +194,7 @@ def random_types(binary, json_input):
             elif (choice == "list"):
                 copy[key] = list(range(randint(-64, 0), randint(0, 64)))
             elif (choice == "float"):
-                copy[key] = random.uniform(-32, 32)
+                copy[key] = random.uniform(-128, 128)
             elif (choice == "dict"):
                 copy[key] = random_json(False)
         payload = json.dumps(copy).encode('UTF-8')
