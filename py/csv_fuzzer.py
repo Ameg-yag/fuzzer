@@ -88,7 +88,13 @@ def format_string(binary, csv_input):
         payload = payload[:-1] + "\n"
     test_payload(binary, payload)
 
-
+def change_header(binary, csv_input):
+    payload = ''
+    for l in range(0, len(csv_input)):
+        for w in range(0, len(csv_input[l])): 
+            payload += get_random_string(25) + ','
+        payload = payload[:-1] + "\n"
+    test_payload(binary, payload)
 
 
 def csv_fuzzer(binary, inputFile):
@@ -112,6 +118,7 @@ def csv_fuzzer(binary, inputFile):
     # string format 
     format_string(binary, csv_input)
     # change first line
+    change_header(binary, csv_input)
 
     # overflow intergers 
 
