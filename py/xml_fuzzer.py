@@ -10,10 +10,9 @@ from helper import *
 
 
 class XMLFuzzer:
-    def __init__(self, input, binary):
+    def __init__(self, input):
         try:
             self._xml = ET.parse(input).getroot()
-            self.binary = binary
         except Exception as e:
             print(e)
 
