@@ -21,7 +21,7 @@ For areas of dumb fuzzing, we have tried to factor the code so code duplication 
 Some details to add about the JSON fuzzer:
 - Incorporated a nested dictionary test data input (incase of binary loops)
 - checks majority of the common security error ideas (previously listed @Design Approach)
-- Creates effective random json files which use specific keys given by the input json exmaple.
+- Creates effective random json files which use specific keys given by the input json example.
 - Utilises "None" type available to JSON formatting.
 
 
