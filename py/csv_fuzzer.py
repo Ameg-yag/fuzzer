@@ -67,7 +67,7 @@ def remove_delimiters(binary, csv_input, delimiter):
 
 
 def change_delimiters(binary, csv_input):    
-    for x in [" ", ".", ",", "\t", "\n"]:
+    for x in [" ", ".", ",", "\t", "\n", "|", "/", "\\", ":", ";"]:
         payload = ''
         for l in range(0, len(csv_input)):
             payload += x.join(csv_input[l]) + '\n'
@@ -116,7 +116,6 @@ def overflow_numbers(binary, csv_input, delimiter):
         for w in range(0, len(csv_input[l])): 
             payload += str(random.randrange(-4294967296, 0)) + delimiter
         payload = payload[:-1] + "\n"
-    print(payload)
     test_payload(binary, payload)
 
     # high postive numbers 
@@ -126,7 +125,6 @@ def overflow_numbers(binary, csv_input, delimiter):
         for w in range(0, len(csv_input[l])): 
             payload += str(random.randrange(2147483648,(2**65)))+ delimiter
         payload = payload[:-1] + "\n"
-    print(payload)
     test_payload(binary, payload)
 
     # float
@@ -136,9 +134,20 @@ def overflow_numbers(binary, csv_input, delimiter):
         for w in range(0, len(csv_input[l])): 
             payload += str(random.random()) + delimiter
         payload = payload[:-1] + "\n"
-    print(payload)
     test_payload(binary, payload)
 
+def byte_flip(binary, csv_input, delimiter):
+    payload = "" 
+    freq = random.randrange(1, 20)
+    for l in range(0, len(csv_input)):
+        for w in range(0, len(csv_input[l])): 
+            payload += csv_input[l][w] + delimiter
+        payload = payload[:-1] + "\n"
+    payload = bytearray(payload, 'UTF-8')
+    for i in range(0, len(payload)):
+        if random.randint(0,freq) == 1:
+            payload[i] ^= random.getrandbits(7)
+    test_payload(binary, payload)
 
 def csv_fuzzer(binary, inputFile):
     csv_input, delimiter = read_csv(inputFile)
@@ -147,9 +156,9 @@ def csv_fuzzer(binary, inputFile):
     # invalid csv - remove all delimiters 
     remove_delimiters(binary, csv_input, delimiter)
     # check number of lines
-    #lines_csv(binary, csv_input, delimiter)
+    lines_csv(binary, csv_input, delimiter)
     # check fields - can return number of expected fields
-    #fields_csv(binary, csv_input, delimiter)
+    fields_csv(binary, csv_input, delimiter)
     # change delimiters
     change_delimiters(binary, csv_input)
     # overflowing fields with string 
@@ -160,11 +169,7 @@ def csv_fuzzer(binary, inputFile):
     change_header(binary, csv_input, delimiter)
     # overflow intergers 
     overflow_numbers(binary, csv_input, delimiter)
-    # overflow strings
-
-    # random types of 
-
     # bit flipping
-
-    # unexcepeted values
+    for x in range(0, 20):
+        byte_flip(binary,csv_input,delimiter)
 
