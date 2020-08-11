@@ -55,16 +55,47 @@ def lines_csv(binary, csv_input):
 
         test_payload(binary, "".join(error))
 
+# remove all delimiters make file invalid 
+def remove_delimiters(binary, csv_input):
+    payload = ''
+    for l in range(0, len(csv_input)):
+        payload += "".join(csv_input[l]) + '\n'
+    test_payload(binary, payload)
+
+
+def change_delimiters(binary, csv_input):    
+    for x in [" ", ".", ",", "\t", "\n"]:
+        payload = ''
+        for l in range(0, len(csv_input)):
+            payload += x.join(csv_input[l]) + '\n'
+        test_payload(binary, payload)
+
 
 def csv_fuzzer(binary, inputFile):
     csv_input = read_csv(inputFile)
     # check nothing
     empty(binary)
+    # invalid csv - remove all delimiters 
+    remove_delimiters(binary, csv_input)
     # check number of lines
     lines_csv(binary, csv_input)
     # check fields - can return number of expected fields
     fields_csv(binary, csv_input)
+    # change delimiters
+    change_delimiters(binary, csv_input)
     # bit flipping
+    
     # overflowing
+    
     # unexcepeted values
-    #
+
+    # string format 
+
+    # change first line
+
+    # overflow intergers 
+
+    # overflow strings
+
+    # random types of 
+
