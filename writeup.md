@@ -21,6 +21,27 @@ For areas of dumb fuzzing, we have tried to factor the code so code duplication 
 Some details to add about the JSON fuzzer:
 - Incorporated a nested dictionary test data input (incase of binary loops)
 - checks majority of the common security error ideas (previously listed @Design Approach)
+- Creates effective random json files which use specific keys given by the input json exmaple.
+- Utilises "None" type available to JSON formatting.
 
 
 ## CSV Fuzzer
+Currently the csv fuzzer tries the following to elicit memory corruption:  
+- Sending empty payload 
+- Sending a CSV payload with increasingly number of lines
+- Sending different number of fields (comma seperated values)
+
+
+## XML Fuzzer
+The XML Fuzzer is currently in early stages of development, but so far it has the following functionality
+- Sending non-XML test data (empty string, basic small string (e.g. "ABC") and a very large string ("ABC" * 1000))
+- Mutating the supplied test data to attempt to have it a parse an invalid (but in a valid enough format) XML file
+    - Removing children nodes, or children of those children nodes
+    - Moving the order of children nodes, or duplicating them
+- Attempted to add functionality to include unexpected data to valid tags (e.g. format strings in attributes)
+
+## Plaintext fuzzer
+
+## Bonus Marks
+
+# Future Work

@@ -26,6 +26,9 @@ class XMLFuzzer:
 
         return bytes.decode("ascii")
 
+    """
+    Adds new nodes to the existing XML test input, which attempt to find a vulnerability in a certain part of the parrsing of the document
+    """
     def _add_node(self, functions):
         root = copy.deepcopy(self._xml)
         child = ET.SubElement(root, 'div')
@@ -132,6 +135,9 @@ class XMLFuzzer:
 
         return root
 
+    """ 
+    Treats the XML data as a string and replaces certain important parts with invalid data 
+    """
     def _replace_text(self, functions):
         lines = self._text.decode()
 
@@ -184,11 +190,13 @@ class XMLFuzzer:
             for i in range(0, 6):
                 yield ET.tostring(self._mutate_node(child, [i])).decode()
 
+            yield ET.tostring(self._mutate_node(child, range(1, 6))).decode()
+
         # Create some new nodes and add these to the test input
         for i in range(0, 6):
             yield ET.tostring(self._add_node([i])).decode()
 
-        yield ET.tostring(self._add_node((range(0, 6)))).decode()
+        yield ET.tostring(self._add_node((range(0, 5)))).decode()
 
         ##########################################################
 
@@ -198,12 +206,14 @@ class XMLFuzzer:
         for i in range(0, 5):
             yield self._replace_text([i])
 
-        # for i in range(0, 1000):
-        #     # test random input (invalid XML)
-        #     yield get_random_string((i + 1) * 10)
+        yield self._replace_text(range(0, 5))
 
-        #     # test random bitflips on the test input
-        #     yield self._byteflip()
+        for i in range(0, 1000):
+            # test random bitflips on the test input
+            yield self._byteflip()
+
+            # test random input (invalid XML)
+            yield get_random_string((i + 1) * 10)
 
         ###########################################################
 
@@ -212,9 +222,6 @@ def xml_fuzzer(binary, inputFile):
 
     with open(inputFile) as input:
         for test_input in XMLFuzzer(input).generate_input():
-            with open("test.txt", "w+") as out:
-                out.write(test_input)
-
             try:
                 test_payload(binary, test_input)
             except Exception as e:
