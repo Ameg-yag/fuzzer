@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from pwn import *
 from helper import *
 
+
 class XMLFuzzer:
     def __init__(self, input, binary):
         try:
@@ -17,36 +18,32 @@ class XMLFuzzer:
             print(e)
 
     def _bitflip(self, xml):
-        bytes = bytearray(xml, 'UTF-8')
+        bytes = bytearray(xml, "UTF-8")
 
         for i in range(0, len(bytes)):
             if random.randint(0, 20) == 1:
                 bytes[i] ^= random.getrandbits(7)
 
-        return bytes.decode('ascii')
+        return bytes.decode("ascii")
 
     def _add(self, functions):
         root = copy.deepcopy(self._xml)
 
         def _add_links():
             # Forge some wierd links
-            child = ET.SubElement(root, 'div')
+            child = ET.SubElement(root, "div")
             child.set("$s$s$s$s", "$s$s$s$s")
-            content = ET.SubElement(child, 'a')
+            content = ET.SubElement(child, "a")
             content.set("a href", "http://%s%s%s%s%s.com")
             root.append(child)
 
-        def _add_grandchild(): 
+        def _add_grandchild():
             pass
 
         def _add_to_child():
             pass
 
-        switch = {
-            0: _add_links,
-            1: _add_grandchild,
-            2: _add_to_child
-        }
+        switch = {0: _add_links, 1: _add_grandchild, 2: _add_to_child}
 
         for i in functions:
             try:
@@ -57,8 +54,8 @@ class XMLFuzzer:
         return root
 
     def _mutate(self, child, functions):
-        root = copy.deepcopy(self._xml)     # Don't overwrite the original text
-        child = root.find(child.tag)        #
+        root = copy.deepcopy(self._xml)  # Don't overwrite the original text
+        child = root.find(child.tag)  #
 
         # remove the given node from the root
         def _remove():
@@ -107,7 +104,7 @@ class XMLFuzzer:
             2: _duplicate_recursively,
             3: _move,
             4: _add_info,
-            5: _remove_child
+            5: _remove_child,
         }
 
         for i in functions:
@@ -116,7 +113,7 @@ class XMLFuzzer:
             except Exception as e:
                 print(i)
                 print(e)
-    
+
         return root
 
     def generate_input(self):
@@ -154,7 +151,6 @@ class XMLFuzzer:
 
         ############################################################
 
-
         ############################################################
         ##             Test invalid (format) XML data             ##
 
@@ -167,21 +163,23 @@ class XMLFuzzer:
 
         ############################################################
 
+
 def xml_fuzzer(binary, inputFile):
-    context.log_level = 'WARNING'
+    context.log_level = "WARNING"
 
     with open(inputFile) as input:
-        for test_input in XMLFuzzer(input, binary).generate_input():
-            #print("Testing...")            
-            #test = open("test.txt", "w")
-            #test.writelines(str(test_input))
-            #test.close()
+        for test_input in XMLFuzzer(input).generate_input():
+            # print("Testing...")
+            # test = open("test.txt", "w")
+            # test.writelines(str(test_input))
+            # test.close()
 
             try:
                 test_payload(binary, test_input)
             except Exception as e:
                 print(e)
 
-            #print("Testing succeeded")
- 
-    #xml_fuzzer(binary, inputFile)
+            # print("Testing succeeded")
+
+    # xml_fuzzer(binary, inputFile)
+
