@@ -112,38 +112,40 @@ def overflow_numbers(binary, csv_input, delimiter):
     # zero 
     payload = ''
     payload = delimiter.join(csv_input[0]) + '\n'
+    firstline = len(payload)
     for l in range(1, len(csv_input)):
         for w in range(0, len(csv_input[l])): 
             payload += "0" + delimiter
         payload = payload[:-1] + "\n"
     test_payload(binary, payload)
+    test_payload(binary, payload[firstline:])
 
     # negative numbers 
-    payload = ''
     payload = delimiter.join(csv_input[0]) + '\n'
     for l in range(1, len(csv_input)):
         for w in range(0, len(csv_input[l])): 
             payload += str(random.randrange(-4294967296, 0)) + delimiter
         payload = payload[:-1] + "\n"
     test_payload(binary, payload)
+    test_payload(binary, payload[firstline:])
 
     # high postive numbers 
-    payload = ''
     payload = delimiter.join(csv_input[0]) + '\n'
     for l in range(1, len(csv_input)):
         for w in range(0, len(csv_input[l])): 
             payload += str(random.randrange(2147483648,(2**65)))+ delimiter
         payload = payload[:-1] + "\n"
     test_payload(binary, payload)
+    test_payload(binary, payload[firstline:])
 
     # float
-    payload = ''
     payload = delimiter.join(csv_input[0]) + '\n'
     for l in range(1, len(csv_input)):
         for w in range(0, len(csv_input[l])): 
             payload += str(random.random()) + delimiter
         payload = payload[:-1] + "\n"
     test_payload(binary, payload)
+    test_payload(binary, payload[firstline:])
 
 def byte_flip(binary, csv_input, delimiter):
     payload = "" 
@@ -165,9 +167,9 @@ def csv_fuzzer(binary, inputFile):
     # invalid csv - remove all delimiters 
     remove_delimiters(binary, csv_input, delimiter)
     # check number of lines
-    #lines_csv(binary, csv_input, delimiter)
+    lines_csv(binary, csv_input, delimiter)
     # check fields - can return number of expected fields
-    #fields_csv(binary, csv_input, delimiter)
+    fields_csv(binary, csv_input, delimiter)
     # change delimiters
     change_delimiters(binary, csv_input)
     # overflowing fields with string 

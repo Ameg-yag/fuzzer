@@ -35,7 +35,8 @@ Currently the csv fuzzer tries the following to elicit memory corruption:
 - Sending payload with increasingly large strings
 - Sending format strings in the payload 
 - Sending payload with varying numbers, 0, negative, large numbers, floats
-- Byte Flipping 
+- Byte Flipping
+- Test with and with out altering the header line  
 
 
 
