@@ -75,10 +75,12 @@ def change_delimiters(binary, csv_input):
 
 def overflow_fields(binary, csv_input, delimiter):
     for x in range(32, 1000, 32):
-        payload = delimiter.join(csv_input[0]) + '\n'
-        for l in range(1, len(csv_input)):
+        payload = ''
+        for l in range(0, len(csv_input)):
+            if (l == 1 and random.randrange(0,1) == 1):
+                payload += delimiter.join(csv_input[0]) + '\n'
+                continue
             for w in csv_input[l]:
-                
                 payload += "A"*x + delimiter
             payload = payload[:-1] + "\n"
         test_payload(binary, payload)
@@ -87,6 +89,12 @@ def format_string(binary, csv_input, delimiter):
     for x in ["%p", "%s"]:
         payload = delimiter.join(csv_input[0]) + '\n'
         for l in range(1, len(csv_input)):
+            for w in csv_input[l]:   
+                payload += x*32 + delimiter
+            payload = payload[:-1] + "\n"
+        test_payload(binary, payload)
+    for x in ["%p", "%s"]:
+        for l in range(0, len(csv_input)):
             for w in csv_input[l]:   
                 payload += x*32 + delimiter
             payload = payload[:-1] + "\n"
@@ -173,4 +181,3 @@ def csv_fuzzer(binary, inputFile):
     # bit flipping
     for x in range(0, 20):
         byte_flip(binary,csv_input,delimiter)
-
