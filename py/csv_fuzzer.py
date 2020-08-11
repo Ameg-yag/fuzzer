@@ -76,10 +76,18 @@ def overflow_fields(binary, csv_input):
         for l in range(1, len(csv_input)):
             for w in csv_input[l]:
                 
-                payload += "A"*x 
-                payload += ","
+                payload += "A"*x + ","
             payload = payload[:-1] + "\n"
         test_payload(binary, payload)
+
+def format_string(binary, csv_input):
+    payload = ",".join(csv_input[0]) + '\n'
+    for l in range(1, len(csv_input)):
+        for w in csv_input[l]:   
+            payload += "%p"*32 + ","
+        payload = payload[:-1] + "\n"
+    test_payload(binary, payload)
+
 
 
 
@@ -101,9 +109,8 @@ def csv_fuzzer(binary, inputFile):
 
     # overflowing
     overflow_fields(binary, csv_input)
-
     # string format 
-
+    format_string(binary, csv_input)
     # change first line
 
     # overflow intergers 
