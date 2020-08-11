@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 
 import sys
 import os
@@ -50,6 +50,6 @@ with open(inputFile) as file:
         txt_fuzzer(binary, inputFile)
 
     # Busy wait until workers finsh
-    while len(multiprocessing.active_children()) > 0:
+    while len(MP.active_children()) > 0:
         sleep(1)
 

@@ -2,12 +2,15 @@ from pwn import *
 import csv
 import json
 import xml.etree.ElementTree as ET
-import multiprocessing
+import multiprocessing as MP
 
+global solution_found
+solution_found = MP.Event()
+global quit_all
+quit_all = MP.Event()
 
 def empty(binary):
     test_payload(binary, "")
-
 
 def is_json(file):
     try:
@@ -17,7 +20,6 @@ def is_json(file):
         return False
     return True
 
-
 def is_csv(file):
     try:
         file.seek(0)
@@ -25,14 +27,11 @@ def is_csv(file):
     except csv.Error:
         return False
 
-    if (
-        csv.excel.delimiter == csvObj.delimiter
-        or csv.excel_tab.delimiter == csvObj.delimiter
-    ):
+    if (csv.excel.delimiter == csvObj.delimiter
+        or csv.excel_tab.delimiter == csvObj.delimiter):
         return True
 
     return False
-
 
 def is_xml(file):
     file.seek(0)
@@ -42,24 +41,19 @@ def is_xml(file):
         return False
     return True
 
-
 def check_segfault(p, output):
     p.proc.stdin.close()
     if p.poll(block=True) == -11:
         print("Found something... saving to file bad.txt")
         with open("./bad.txt", "w") as out:
             out.write(output)
+        solution_found.set()
         return True
     else:
         return False
 
-
 def get_random_string(length):
-    letters = string.ascii_lowercase
-    letters += string.ascii_uppercase
-    new_str = "".join(random.choice(letters) for i in range(length))
-    return new_str
-
+    return "".join(random.choice(string.ascii_lowercase + string.ascii_uppercase) for i in range(length))
 
 def test_payload(binary, payload):
     # Prepare payload for sending
@@ -71,29 +65,24 @@ def test_payload(binary, payload):
             exit("payload is not a byte string")
 
     # Benchmarking shows that having more processes than cpu cores improves performace, maybe IO bound or waiting while polling
-    if (
-        len(multiprocessing.active_children()) < multiprocessing.cpu_count() * 2
-        and multiprocessing.current_process().name == "MainProcess"
-    ):
-
-        p = multiprocessing.Process(target=test_payload, args=(binary, payload))
+    if ((len(MP.active_children()) < (MP.cpu_count() * 2)) and (MP.current_process().name == "MainProcess")):
+        p = MP.Process(target=test_payload, args=(binary, payload))
         p.daemon = True
         p.start()
 
     else:
         run_test(binary, payload)
 
-
 def run_test(binary, payload):
-
     with process(binary) as p:
         # commented because payload doesn't needed to be unicoded
         # test payload is byte array
         p.send(payload)
         if check_segfault(p, payload):
-            if multiprocessing.current_process().name != "MainProcess":
+            if MP.current_process().name != "MainProcess":
                 try:
-                    os.kill(os.getppid(), signal.SIGTERM)
+                    #os.kill(os.getppid(), signal.SIGTERM)
+                    sys.exit()
                 except PermissionError:
                     sys.exit()
             else:
