@@ -73,10 +73,9 @@ class XMLFuzzer:
 
     """
     Modifies the provided child node of the test_input and returns the new test input
-
-    child:      one of the children nodes of the test input
-    functions:  an array of integers specifying which of the inner function to use
-                in order to change the data
+        @child:     one of the children nodes of the test input
+        @functions: an array of integers specifying which of the inner function to use
+                    in order to change the data
     """
     def _mutate_node(self, child, functions):
         root = copy.deepcopy(self._xml)     # Don't overwrite the original text
@@ -177,8 +176,8 @@ class XMLFuzzer:
         # test how the binary reacts to no input
         yield ""
 
-        ###########################################################
-        ##             Test valid (format) XML data              ##
+        ##########################################################
+        ##             Test valid (format) XML data             ##
 
         # Modify the test input to still be in the correct format for XML
         for child in self._xml:
@@ -189,20 +188,22 @@ class XMLFuzzer:
         for i in range(0, 6):
             yield ET.tostring(self._add_node([i])).decode()
 
-        ###########################################################
+        yield ET.tostring(self._add_node((range(0, 6)))).decode()
 
-        ############################################################
-        ##             Test invalid (format) XML data             ##
+        ##########################################################
+
+        ##########################################################
+        ##            Test invalid (format) XML data            ##
 
         for i in range(0, 5):
             yield self._replace_text([i])
 
-        for i in range(0, 1000):
-            # test random input (invalid XML)
-            yield get_random_string((i + 1) * 10)
+        # for i in range(0, 1000):
+        #     # test random input (invalid XML)
+        #     yield get_random_string((i + 1) * 10)
 
-            # test random bitflips on the test input
-            yield self._byteflip()
+        #     # test random bitflips on the test input
+        #     yield self._byteflip()
 
         ###########################################################
 
@@ -218,6 +219,3 @@ def xml_fuzzer(binary, inputFile):
                 test_payload(binary, test_input)
             except Exception as e:
                 print(e)
-
-    # In case no errors are caught, run again
-    # xml_fuzzer(binary, inputFile)
