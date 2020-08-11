@@ -4,11 +4,6 @@ import json
 import xml.etree.ElementTree as ET
 import multiprocessing as MP
 
-global solution_found
-solution_found = MP.Event()
-global quit_all
-quit_all = MP.Event()
-
 def empty(binary):
     test_payload(binary, "")
 
@@ -47,7 +42,6 @@ def check_segfault(p, output):
         print("Found something... saving to file bad.txt")
         with open("./bad.txt", "w") as out:
             out.write(output)
-        solution_found.set()
         return True
     else:
         return False
@@ -81,8 +75,7 @@ def run_test(binary, payload):
         if check_segfault(p, payload):
             if MP.current_process().name != "MainProcess":
                 try:
-                    #os.kill(os.getppid(), signal.SIGTERM)
-                    sys.exit()
+                    os.kill(os.getppid(), signal.SIGTERM)
                 except PermissionError:
                     sys.exit()
             else:
